@@ -1,0 +1,65 @@
+############################
+# Project-specific folders
+############################
+
+# Local experiment data / results (do NOT track)
+base/
+data/
+result_csv/
+weights_cifar10/
+weights_cifar10
+
+############################
+# Python cache / compiled
+############################
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+############################
+# Logs / outputs
+############################
+
+logs/
+outputs/
+runs/
+
+############################
+# Model checkpoints
+############################
+
+*.pt
+*.pth
+*.ckpt
+
+############################
+# Environment
+############################
+
+.env
+.venv/
+venv/
+conda_env/
+
+############################
+# OS / editor junk
+############################
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+############################
+# Temporary files
+############################
+
+*.tmp
+*.swp
+
+# Local evaluation config (do not track)
+config/eval.yaml
+
+
