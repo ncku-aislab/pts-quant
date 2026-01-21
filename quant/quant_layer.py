@@ -42,14 +42,17 @@ class UniformAffineQuantizer(nn.Module):
     :param prob: for qdrop;
     """
 
-    def __init__(self, n_bits: int = 8, symmetric: bool = False, channel_wise: bool = False,
+    def __init__(self, n_bits: int = 8, symmetric: bool = False, signed: bool = True, channel_wise: bool = False,
                  scale_method: str = 'minmax',
                  leaf_param: bool = False, prob: float = 1.0,
                  qparam_shape=None):
         super(UniformAffineQuantizer, self).__init__()
         self.sym = symmetric
-        if self.sym:
-            raise NotImplementedError
+        self.signed = signed
+
+        if self.sym and not self.signed:
+            # You *can* implement unsigned symmetric, but it is uncommon and often confusing.
+            raise ValueError("Symmetric quantization is typically used with signed integers (signed=True).")
         assert 2 <= n_bits <= 8, 'bitwidth not supported'
         self.n_bits = n_bits
         self.n_levels = 2 ** self.n_bits
@@ -57,7 +60,11 @@ class UniformAffineQuantizer(nn.Module):
         '''if leaf_param, use EMA to set scale'''
         self.leaf_param = leaf_param
         self.channel_wise = channel_wise
-        self.eps = torch.tensor(1e-8, dtype=torch.float32)
+        self.register_buffer("eps", torch.tensor(1e-8))
+
+        if self.sym and not self.signed:
+            # You *can* implement unsigned symmetric, but it is uncommon and often confusing.
+            raise ValueError("Symmetric quantization is typically used with signed integers (signed=True).")
 
         if qparam_shape == None:
             #self.scale = nn.Parameter(torch.tensor(float(1.0)))
@@ -83,6 +90,21 @@ class UniformAffineQuantizer(nn.Module):
 
     def set_inited(self, inited: bool = True):  # inited manually
         self.inited = inited
+    
+    def get_qrange(self):
+        """
+        Return integer quantization range [quant_min, quant_max].
+        """
+        if self.sym:
+            if not self.signed:
+                # Not supported in this version
+                raise ValueError("Unsigned symmetric is not supported.")
+            quant_min = -(2 ** (self.n_bits - 1))
+            quant_max = (2 ** (self.n_bits - 1)) - 1
+        else:
+            quant_min = 0
+            quant_max = self.n_levels - 1
+        return quant_min, quant_max
 
     def update_quantize_range(self, x_min, x_max):
         if self.running_min is None:
@@ -98,10 +120,12 @@ class UniformAffineQuantizer(nn.Module):
                 self.delta, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
             else:
                 self.delta, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
+        
+        quant_min, quant_max = self.get_qrange()
 
         # start quantization
         x_int = round_ste(x / self.delta) + self.zero_point
-        x_quant = torch.clamp(x_int, 0, self.n_levels - 1)
+        x_quant = torch.clamp(x_int, quant_min, quant_max)
         x_dequant = (x_quant - self.zero_point) * self.delta
         if self.is_training and self.prob < 1.0:
             x_ans = torch.where(torch.rand_like(x) < self.prob, x_dequant, x)
@@ -119,7 +143,16 @@ class UniformAffineQuantizer(nn.Module):
 
     def calculate_qparams(self, min_val, max_val):
         # one_dim or one element
-        quant_min, quant_max = 0, self.n_levels - 1
+        quant_min, quant_max = self.get_qrange()
+
+        if self.sym:
+            # Symmetric: zp = 0, scale from max absolute
+            max_abs = torch.max(max_val.abs(), min_val.abs())
+            scale = max_abs / float(quant_max)  # quant_max is positive
+            scale = torch.max(scale, self.eps)
+            zero_point = torch.zeros_like(scale)
+            return scale, zero_point
+
         min_val_neg = torch.min(min_val, torch.zeros_like(min_val))
         max_val_pos = torch.max(max_val, torch.zeros_like(max_val))
 
@@ -131,17 +164,21 @@ class UniformAffineQuantizer(nn.Module):
 
     def quantize(self, x: torch.Tensor, x_max, x_min):
         delta, zero_point = self.calculate_qparams(x_min, x_max)
+        quant_min, quant_max = self.get_qrange()
         if self.channel_wise:
             new_shape = [1] * len(x.shape)
             new_shape[0] = x.shape[0]
             delta = delta.reshape(new_shape)
             zero_point = zero_point.reshape(new_shape)
-        x_int = torch.round(x / delta)
-        x_quant = torch.clamp(x_int + zero_point, 0, self.n_levels - 1)
+        x_int = torch.round(x / delta) + zero_point
+        x_quant = torch.clamp(x_int, quant_min, quant_max)
         x_float_q = (x_quant - zero_point) * delta
         return x_float_q
 
     def perform_2D_search(self, x):
+        if self.sym:
+            # symmetric -> no zp enumeration needed; fall back to 1D search
+            return self.perform_1D_search(x)
         if self.channel_wise:
             y = torch.flatten(x, 1)
             x_min, x_max = torch._aminmax(y, 1)
@@ -176,15 +213,22 @@ class UniformAffineQuantizer(nn.Module):
             x_min, x_max = torch._aminmax(y, 1)
         else:
             x_min, x_max = torch._aminmax(x)
-        xrange = torch.max(x_min.abs(), x_max)
+        if self.sym:
+            xrange = torch.max(x_min.abs(), x_max.abs())
+        else:
+            xrange = torch.max(x_min.abs(), x_max)
         best_score = torch.zeros_like(x_min) + (1e+10)
         best_min = x_min.clone()
         best_max = x_max.clone()
         # enumerate xrange
         for i in range(1, self.num + 1):
             thres = xrange / self.num * i
-            new_min = torch.zeros_like(x_min) if self.one_side_dist == 'pos' else -thres
-            new_max = torch.zeros_like(x_max) if self.one_side_dist == 'neg' else thres
+            if self.sym:
+                new_min = -thres
+                new_max = thres
+            else:
+                new_min = torch.zeros_like(x_min) if self.one_side_dist == "pos" else -thres
+                new_max = torch.zeros_like(x_max) if self.one_side_dist == "neg" else thres
             x_q = self.quantize(x, new_max, new_min)
             score = self.lp_loss(x, x_q, 2.4)
             best_min = torch.where(score < best_score, new_min, best_min)
@@ -197,10 +241,15 @@ class UniformAffineQuantizer(nn.Module):
             raise NotImplementedError
         if self.one_side_dist is None:
             self.one_side_dist = 'pos' if x.min() >= 0.0 else 'neg' if x.max() <= 0.0 else 'no'
-        if self.one_side_dist != 'no' or self.sym:  # one-side distribution or symmetric value for 1-d search
+
+        if self.sym:
             best_min, best_max = self.perform_1D_search(x)
-        else:  # 2-d search
-            best_min, best_max = self.perform_2D_search(x)
+        else:
+            if self.one_side_dist != "no":
+                best_min, best_max = self.perform_1D_search(x)
+            else:
+                best_min, best_max = self.perform_2D_search(x)
+
         if self.leaf_param:
             return self.update_quantize_range(best_min, best_max)
         return best_min, best_max
