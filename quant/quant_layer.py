@@ -377,6 +377,7 @@ class PTSQuantizer(nn.Module):
         # copying all attributes from UniformAffineQuantizer
         self.n_bits = uaq.n_bits
         self.sym = uaq.sym
+        self.signed = uaq.signed
         self.delta = uaq.delta
         self.log2_delta_floor = None
         self.zero_point = uaq.zero_point
@@ -408,6 +409,15 @@ class PTSQuantizer(nn.Module):
         self.pts_beta = 2/3
         self.init_pts_alpha()
     
+    def get_qrange(self):
+        if self.sym:
+            qmin = -(2 ** (self.n_bits - 1))
+            qmax = (2 ** (self.n_bits - 1)) - 1
+        else:
+            qmin = 0
+            qmax = self.n_levels - 1
+        return qmin, qmax
+    
     def forward(self, x):
         if self.pts_mode == 'learned_hard_sigmoid':
             if self.pts_soft_targets:
@@ -420,6 +430,9 @@ class PTSQuantizer(nn.Module):
         else:
             raise NotImplementedError
         delta = torch.pow(2.0, log2_delta)
+
+        qmin, qmax = self.get_qrange()
+
         # If quantizer is for weight
         if self.leaf_param == False:
             if self.round_mode == 'learned_hard_sigmoid':
@@ -431,14 +444,14 @@ class PTSQuantizer(nn.Module):
             else:
                 raise ValueError('Wrong rounding mode')
             
-            x_quant = torch.clamp(x_int + self.zero_point, 0, self.n_levels - 1)
+            x_quant = torch.clamp(x_int + self.zero_point, qmin, qmax)
             x_float_q = (x_quant - self.zero_point) * delta
 
             return x_float_q
         # If quantizer is for activation
         else:   
             x_int = round_ste(x / delta) + self.zero_point
-            x_quant = torch.clamp(x_int, 0, self.n_levels - 1)
+            x_quant = torch.clamp(x_int, qmin, qmax)
             x_dequant = (x_quant - self.zero_point) * delta
             if self.is_training and self.prob < 1.0:
                 x_ans = torch.where(torch.rand_like(x) < self.prob, x_dequant, x)
@@ -466,6 +479,8 @@ class PTSQuantizer(nn.Module):
         Compute the inverse mapping from a constrained variable in (0, 1)
         back to the corresponding unconstrained alpha.
         """
+        eps = 1e-6
+        rest = rest.clamp(eps, 1 - eps)
         if self.scale_constraint_fn == 'sigmoid':
             # inverse sigmoid
             return -torch.log((1 / rest) - 1)
