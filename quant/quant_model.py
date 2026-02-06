@@ -98,8 +98,8 @@ class QuantModel(nn.Module):
         w_list[0].bitwidth_refactor(8)
         w_list[-1].bitwidth_refactor(8)
         'the image input has been in 0~255, set the last layer\'s input to 8-bit'
-        a_list[-2].bitwidth_refactor(8)
-        # a_list[0].bitwidth_refactor(8)
+        a_list[-2].bitwidth_refactor(9)
+        a_list[0].bitwidth_refactor(9)
 
     def disable_network_output_quantization(self):
         module_list = []

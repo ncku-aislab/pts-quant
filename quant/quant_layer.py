@@ -53,7 +53,7 @@ class UniformAffineQuantizer(nn.Module):
         if self.sym and not self.signed:
             # You *can* implement unsigned symmetric, but it is uncommon and often confusing.
             raise ValueError("Symmetric quantization is typically used with signed integers (signed=True).")
-        assert 2 <= n_bits <= 8, 'bitwidth not supported'
+        assert 2 <= n_bits <= 9, 'bitwidth not supported'
         self.n_bits = n_bits
         self.n_levels = 2 ** self.n_bits
         self.inited = True
@@ -277,7 +277,7 @@ class UniformAffineQuantizer(nn.Module):
             self.delta.copy_(torch.pow(2, rounded_log2))
 
     def bitwidth_refactor(self, refactored_bit: int):
-        assert 2 <= refactored_bit <= 8, 'bitwidth not supported'
+        assert 2 <= refactored_bit <= 9, 'bitwidth not supported'
         self.n_bits = refactored_bit
         self.n_levels = 2 ** self.n_bits
 
