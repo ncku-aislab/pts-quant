@@ -1,18 +1,18 @@
 version: 0.1.0
 
 models:
-  - model_name: ResNet50
-    weight_path: weights_cifar10/ResNet50.pth
-    save_path: weights_cifar10/PTS-Quant/ResNet50-i4sc_PTS-Quant.pth
+  - model_name: ResNet18
+    weight_path: weights_cifar10/ResNet18.pth
+    save_path: weights_cifar10/PTS-Quant/ResNet18-i4sc_PTS-Quant.pth
     wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
                     'leaf_param': True, 'prob': 0.5}
     recon: True
   - model_name: ResNet50
     weight_path: weights_cifar10/ResNet50.pth
-    save_path: weights_cifar10/PTS-Quant/ResNet50-i2sc_PTS-Quant.pth
-    wq_params: {'n_bits': 2, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
+    save_path: weights_cifar10/PTS-Quant/ResNet50-i4sc_PTS-Quant.pth
+    wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
                     'leaf_param': True, 'prob': 0.5}
     recon: True
   - model_name: MobileNetV2
@@ -22,13 +22,6 @@ models:
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
                     'leaf_param': True, 'prob': 0.5}
     recon: True
-  - model_name: MobileNetV2
-    weight_path: weights_cifar10/MobileNetV2.pth
-    save_path: weights_cifar10/PTS-Quant/MobileNetV2-i2sc_PTS-Quant.pth
-    wq_params: {'n_bits': 2, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
-                    'leaf_param': True, 'prob': 0.5}
-    recon: True
   - model_name: RegNetX600-MF
     weight_path: weights_cifar10/RegNetX600-MF.pth
     save_path: weights_cifar10/PTS-Quant/RegNetX600-MF-i4sc_PTS-Quant.pth
@@ -36,25 +29,11 @@ models:
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
                     'leaf_param': True, 'prob': 0.5}
     recon: True
-  - model_name: RegNetX600-MF
-    weight_path: weights_cifar10/RegNetX600-MF.pth
-    save_path: weights_cifar10/PTS-Quant/RegNetX600-MF-i2sc_PTS-Quant.pth
-    wq_params: {'n_bits': 2, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
-                    'leaf_param': True, 'prob': 0.5}
-    recon: True
   - model_name: RegNetX3.2-GF
     weight_path: weights_cifar10/RegNetX3.2-GF.pth
     save_path: weights_cifar10/PTS-Quant/RegNetX3.2-GF-i4sc_PTS-Quant.pth
     wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
-                    'leaf_param': True, 'prob': 0.5}
-    recon: True
-  - model_name: RegNetX3.2-GF
-    weight_path: weights_cifar10/RegNetX3.2-GF.pth
-    save_path: weights_cifar10/PTS-Quant/RegNetX3.2-GF-i2sc_PTS-Quant.pth
-    wq_params: {'n_bits': 2, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'simple',
                     'leaf_param': True, 'prob': 0.5}
     recon: True
   
