@@ -135,7 +135,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
             layer.weight_quantizer.pts_mode = 'normal'
             layer.act_quantizer.convert_scale()
             layer.act_quantizer.pts_mode = 'normal'
-            if not is_power_of_two(layer.weight_quantizer.delta) and not is_power_of_two(layer.act_quantizer.delta):
+            if (not is_power_of_two(layer.weight_quantizer.delta)) or (not is_power_of_two(layer.act_quantizer.delta)):
                 print('Warning: weight and act scale are not power of two')
                 break
 
