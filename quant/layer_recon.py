@@ -41,7 +41,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
                         opt_mode: str = 'mse', b_range: tuple = (20, 2),
                         warmup: float = 0.0, p: float = 2.0, lr: float = 4e-5, input_prob: float = 1.0, 
                         keep_gpu: bool = True, lamb_r: float = 0.2, T: float = 7.0, bn_lr: float = 1e-3, lamb_c=0.02,
-                        s_weight: float = 0.001, s_activation: float = 0.001, scale_iter: int = 10000, constraint_fn: str = 'sigmoid'):
+                        s_weight: float = 0.001, s_activation: float = 0.001, scale_iter: int = 10000, initialization_fn: str = 'sigmoid'):
     """
     Reconstruction to optimize the output from each layer.
 
@@ -56,7 +56,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
     :param include_act_func: optimize the output after activation function
     :param b_range: temperature range
     :param warmup: proportion of iterations that no scheduling for temperature
-    :param lr: learning rate for act delta learning
+    :param lr: learning rate for act scale learning
     :param p: L_p norm minimization
     :param lamb_r: hyper-parameter for regularization
     :param T: temperature coefficient for KL divergence
@@ -65,12 +65,13 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
     :param s_weight: the weight of scale rounding regularization term
     :param s_activation: the weight of scale rounding regularization term
     :param scale_iter: scale factor training iteration
-    :param constraint_fn: constraint function for alpha, must be 'sigmoid' or 'tanh'
+    :param initialization_fn: initialization function for alpha, must be 'sigmoid' or 'tanh'
     """
 
     '''get input and set scale'''
     cached_inps = get_init(model, layer, cali_data, batch_size=batch_size,
                                         input_prob=True, keep_gpu=False).pin_memory()
+    print(layer.weight_quantizer.zero_point)
     cached_outs, cached_output, cur_syms = get_dc_fp_init(fp_model, fp_layer, cali_data, batch_size=batch_size,
                                         input_prob=True, keep_gpu=False, bn_lr=bn_lr, lamb=lamb_c)
     cached_outs, cached_output, cur_syms = cached_outs.pin_memory(), cached_output.pin_memory(), cur_syms.pin_memory()
@@ -78,6 +79,8 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
 
     '''set state'''
     cur_weight, cur_act = True, True
+
+    
     
     global include
     module_list, name_list, include = [], [], False
@@ -96,7 +99,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
 
     '''weight'''
     layer.weight_quantizer = PTSQuantizer(uaq=layer.weight_quantizer, round_mode=round_mode, pts_mode=pts_mode,
-                                               weight_tensor=layer.org_weight.data, constraint_fn=constraint_fn)
+                                               weight_tensor=layer.org_weight.data, initialization_fn=initialization_fn)
     layer.weight_quantizer.soft_targets = True      
     w_para += [layer.weight_quantizer.alpha]
     #weight scale
@@ -105,8 +108,8 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
         layer.weight_quantizer.pts_soft_targets = True
 
     '''activation scale'''
-    if layer.act_quantizer.delta is not None:
-        layer.act_quantizer = PTSQuantizer(uaq=layer.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, constraint_fn=constraint_fn)
+    if layer.act_quantizer.scale is not None:
+        layer.act_quantizer = PTSQuantizer(uaq=layer.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, initialization_fn=initialization_fn)
         if pts_mode == 'learned_hard_sigmoid':
             a_para += [layer.act_quantizer.pts_alpha]
             layer.act_quantizer.pts_soft_targets = True
@@ -135,7 +138,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
             layer.weight_quantizer.pts_mode = 'normal'
             layer.act_quantizer.convert_scale()
             layer.act_quantizer.pts_mode = 'normal'
-            if (not is_power_of_two(layer.weight_quantizer.delta)) or (not is_power_of_two(layer.act_quantizer.delta)):
+            if not is_power_of_two(layer.weight_quantizer.scale) and not is_power_of_two(layer.act_quantizer.scale):
                 print('Warning: weight and act scale are not power of two')
                 break
 

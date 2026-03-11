@@ -53,7 +53,7 @@ class UniformAffineQuantizer(nn.Module):
         if self.sym and not self.signed:
             # You *can* implement unsigned symmetric, but it is uncommon and often confusing.
             raise ValueError("Symmetric quantization is typically used with signed integers (signed=True).")
-        assert 2 <= n_bits <= 8, 'bitwidth not supported'
+        assert 2 <= n_bits <= 9, 'bitwidth not supported'
         self.n_bits = n_bits
         self.n_levels = 2 ** self.n_bits
         self.inited = True
@@ -67,12 +67,10 @@ class UniformAffineQuantizer(nn.Module):
             raise ValueError("Symmetric quantization is typically used with signed integers (signed=True).")
 
         if qparam_shape == None:
-            #self.scale = nn.Parameter(torch.tensor(float(1.0)))
-            self.register_buffer("delta", torch.tensor(float(1.0)))
+            self.register_buffer("scale", torch.tensor(float(1.0)))
             self.register_buffer("zero_point", torch.tensor(int(0)))
         else:
-            #self.scale = nn.Parameter(torch.ones(qparam_shape, dtype=torch.float))
-            self.register_buffer("delta", torch.ones(qparam_shape, dtype=torch.float))
+            self.register_buffer("scale", torch.ones(qparam_shape, dtype=torch.float))
             self.register_buffer("zero_point", torch.zeros(qparam_shape))
 
         '''mse params'''
@@ -94,6 +92,11 @@ class UniformAffineQuantizer(nn.Module):
     def get_qrange(self):
         """
         Return integer quantization range [quant_min, quant_max].
+
+        Symmetric signed quantization:
+            qmin = -2^(b-1), qmax = 2^(b-1)-1
+        Asymmetric unsigned quantization:
+            qmin = 0, qmax = 2^b - 1
         """
         if self.sym:
             if not self.signed:
@@ -106,7 +109,7 @@ class UniformAffineQuantizer(nn.Module):
             quant_max = self.n_levels - 1
         return quant_min, quant_max
 
-    def update_quantize_range(self, x_min, x_max):
+    def update_quantize_range(self, x_min, x_max): #For activation quantization
         if self.running_min is None:
             self.running_min = x_min
             self.running_max = x_max
@@ -117,16 +120,16 @@ class UniformAffineQuantizer(nn.Module):
     def forward(self, x: torch.Tensor):
         if self.inited is False:
             if self.leaf_param:
-                self.delta, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
+                self.scale, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
             else:
-                self.delta, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
+                self.scale, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
         
         quant_min, quant_max = self.get_qrange()
 
         # start quantization
-        x_int = round_ste(x / self.delta) + self.zero_point
+        x_int = round_ste(x / self.scale) + self.zero_point
         x_quant = torch.clamp(x_int, quant_min, quant_max)
-        x_dequant = (x_quant - self.zero_point) * self.delta
+        x_dequant = (x_quant - self.zero_point) * self.scale
         if self.is_training and self.prob < 1.0:
             x_ans = torch.where(torch.rand_like(x) < self.prob, x_dequant, x)
         else:
@@ -163,16 +166,16 @@ class UniformAffineQuantizer(nn.Module):
         return scale, zero_point
 
     def quantize(self, x: torch.Tensor, x_max, x_min):
-        delta, zero_point = self.calculate_qparams(x_min, x_max)
+        scale, zero_point = self.calculate_qparams(x_min, x_max)
         quant_min, quant_max = self.get_qrange()
         if self.channel_wise:
             new_shape = [1] * len(x.shape)
             new_shape[0] = x.shape[0]
-            delta = delta.reshape(new_shape)
+            scale = scale.reshape(new_shape)
             zero_point = zero_point.reshape(new_shape)
-        x_int = torch.round(x / delta) + zero_point
+        x_int = torch.round(x / scale) + zero_point
         x_quant = torch.clamp(x_int, quant_min, quant_max)
-        x_float_q = (x_quant - zero_point) * delta
+        x_float_q = (x_quant - zero_point) * scale
         return x_float_q
 
     def perform_2D_search(self, x):
@@ -195,11 +198,11 @@ class UniformAffineQuantizer(nn.Module):
         for i in range(1, self.num + 1):
             tmp_min = torch.zeros_like(x_min)
             tmp_max = xrange / self.num * i
-            tmp_delta = (tmp_max - tmp_min) / (2 ** self.n_bits - 1)
+            tmp_scale = (tmp_max - tmp_min) / (2 ** self.n_bits - 1)
             # enumerate zp
             for zp in range(0, self.n_levels):
-                new_min = tmp_min - zp * tmp_delta
-                new_max = tmp_max - zp * tmp_delta
+                new_min = tmp_min - zp * tmp_scale
+                new_max = tmp_max - zp * tmp_scale
                 x_q = self.quantize(x, new_max, new_min)
                 score = self.lp_loss(x, x_q, 2.4)
                 best_min = torch.where(score < best_score, new_min, best_min)
@@ -261,23 +264,23 @@ class UniformAffineQuantizer(nn.Module):
     def init_quantization_scale(self, x_clone: torch.Tensor, channel_wise: bool = False):
         if channel_wise:
             # determine the scale and zero point channel-by-channel
-            delta, zero_point = self.init_quantization_scale_channel(x_clone)
+            scale, zero_point = self.init_quantization_scale_channel(x_clone)
             new_shape = [1] * len(x_clone.shape)
             new_shape[0] = x_clone.shape[0]
-            delta = delta.reshape(new_shape)
+            scale = scale.reshape(new_shape)
             zero_point = zero_point.reshape(new_shape)
         else:
-            delta, zero_point = self.init_quantization_scale_channel(x_clone)
-        return delta, zero_point
+            scale, zero_point = self.init_quantization_scale_channel(x_clone)
+        return scale, zero_point
 
     def round_scale_to_pow2(self):
         with torch.no_grad():
-            log2_scale = torch.log2(self.delta)
+            log2_scale = torch.log2(self.scale)
             rounded_log2 = torch.round(log2_scale)
-            self.delta.copy_(torch.pow(2, rounded_log2))
+            self.scale.copy_(torch.pow(2, rounded_log2))
 
     def bitwidth_refactor(self, refactored_bit: int):
-        assert 2 <= refactored_bit <= 8, 'bitwidth not supported'
+        assert 2 <= refactored_bit <= 9, 'bitwidth not supported'
         self.n_bits = refactored_bit
         self.n_levels = 2 ** self.n_bits
 
@@ -372,23 +375,23 @@ class QuantModule(nn.Module):
 
 class PTSQuantizer(nn.Module):
     def __init__(self, uaq: UniformAffineQuantizer, weight_tensor: torch.Tensor = None,
-                round_mode='learned_hard_sigmoid', pts_mode='learned_hard_sigmoid', constraint_fn='sigmoid'):
+                round_mode='learned_hard_sigmoid', pts_mode='learned_hard_sigmoid', initialization_fn='sigmoid'):
         super(PTSQuantizer, self).__init__()
         # copying all attributes from UniformAffineQuantizer
         self.n_bits = uaq.n_bits
         self.sym = uaq.sym
         self.signed = uaq.signed
-        self.delta = uaq.delta
-        self.log2_delta_floor = None
+        self.scale = uaq.scale
+        self.log2_scale_floor = None
         self.zero_point = uaq.zero_point
         self.n_levels = uaq.n_levels
         self.leaf_param = uaq.leaf_param #Check if quantizer is for weight or activation
         self.is_training = uaq.is_training
         self.prob = uaq.prob
 
-        assert constraint_fn in ['sigmoid', 'tanh'], "constraint_fn must be 'sigmoid' or 'tanh'"
-        self.weights_constraint_fn = 'sigmoid'
-        self.scale_constraint_fn = constraint_fn
+        assert initialization_fn in ['sigmoid', 'tanh'], "initialization_fn must be 'sigmoid' or 'tanh'"
+        self.constraint_fn = 'sigmoid'
+        self.initialization_fn = initialization_fn
 
         # Adaround quantizer parameters (if quantizer for weight)
         if self.leaf_param == False:
@@ -424,19 +427,19 @@ class PTSQuantizer(nn.Module):
                 soft = self.get_pts_soft_targets()
             else:
                 soft = (self.pts_alpha >= 0).float()
-            log2_delta = self.log2_delta_floor + soft
+            log2_scale = self.log2_scale_floor + soft
         elif self.pts_mode == 'normal':
-            log2_delta = torch.log2(self.delta)
+            log2_scale = torch.log2(self.scale)
         else:
             raise NotImplementedError
-        delta = torch.pow(2.0, log2_delta)
+        scale = torch.pow(2.0, log2_scale)
 
         qmin, qmax = self.get_qrange()
 
         # If quantizer is for weight
         if self.leaf_param == False:
             if self.round_mode == 'learned_hard_sigmoid':
-                x_floor = torch.floor(x / delta)
+                x_floor = torch.floor(x / scale)
                 if self.soft_targets:
                     x_int = x_floor + self.get_soft_targets()
                 else:
@@ -445,14 +448,14 @@ class PTSQuantizer(nn.Module):
                 raise ValueError('Wrong rounding mode')
             
             x_quant = torch.clamp(x_int + self.zero_point, qmin, qmax)
-            x_float_q = (x_quant - self.zero_point) * delta
+            x_float_q = (x_quant - self.zero_point) * scale
 
             return x_float_q
         # If quantizer is for activation
         else:   
-            x_int = round_ste(x / delta) + self.zero_point
+            x_int = round_ste(x / scale) + self.zero_point
             x_quant = torch.clamp(x_int, qmin, qmax)
-            x_dequant = (x_quant - self.zero_point) * delta
+            x_dequant = (x_quant - self.zero_point) * scale
             if self.is_training and self.prob < 1.0:
                 x_ans = torch.where(torch.rand_like(x) < self.prob, x_dequant, x)
             else:
@@ -465,9 +468,9 @@ class PTSQuantizer(nn.Module):
         Map the unconstrained variable alpha to the interval [gamma, zeta]
         using a sigmoid- or tanh-based constraint function.
         """
-        if self.weights_constraint_fn == 'sigmoid':
+        if self.constraint_fn == 'sigmoid':
             out = torch.sigmoid(alpha)
-        elif self.weights_constraint_fn == 'tanh':
+        elif self.constraint_fn == 'tanh':
             out = 0.5 * (torch.tanh(alpha) + 1)
         else:
             raise ValueError("Invalid constraint_fn")
@@ -481,10 +484,10 @@ class PTSQuantizer(nn.Module):
         """
         eps = 1e-6
         rest = rest.clamp(eps, 1 - eps)
-        if self.scale_constraint_fn == 'sigmoid':
+        if self.initialization_fn == 'sigmoid':
             # inverse sigmoid
             return -torch.log((1 / rest) - 1)
-        elif self.scale_constraint_fn == 'tanh':
+        elif self.initialization_fn == 'tanh':
             # inverse tanh mapping (torch.atanh)
             return torch.atanh(2 * rest - 1)
         else:
@@ -497,10 +500,10 @@ class PTSQuantizer(nn.Module):
         return self.apply_constraint(self.pts_alpha, self.pts_gamma, self.pts_zeta)
     
     def init_alpha(self, x: torch.Tensor):
-        x_floor = torch.floor(x / self.delta)
+        x_floor = torch.floor(x / self.scale)
         if self.round_mode == 'learned_hard_sigmoid':
             print('Init alpha to be FP32')
-            rest = (x / self.delta) - x_floor  # rest of rounding [0, 1)
+            rest = (x / self.scale) - x_floor  # rest of rounding [0, 1)
             alpha = self.inverse_constraint(rest)
             self.alpha = nn.Parameter(alpha)
         else:
@@ -508,13 +511,13 @@ class PTSQuantizer(nn.Module):
             
     def init_pts_alpha(self):
         if self.pts_mode == 'learned_hard_sigmoid':
-            log2_scale = torch.log2(self.delta)
+            log2_scale = torch.log2(self.scale)
             s_floor = torch.floor(log2_scale)
             print('Init pts_alpha to be FP32')
             rest = log2_scale - s_floor  # rest of rounding [0, 1)
             pts_alpha = self.inverse_constraint(rest)
             self.pts_alpha = nn.Parameter(pts_alpha)
-            self.log2_delta_floor = s_floor
+            self.log2_scale_floor = s_floor
         elif self.pts_mode == 'normal':
             pass
         else:
@@ -522,9 +525,9 @@ class PTSQuantizer(nn.Module):
     
     def convert_scale(self):
         soft = (self.pts_alpha >= 0).float()
-        log2_delta = self.log2_delta_floor + soft
-        self.delta = torch.pow(2.0, log2_delta)
+        log2_scale = self.log2_scale_floor + soft
+        self.scale = torch.pow(2.0, log2_scale)
 
     @torch.jit.export
     def extra_repr(self):
-        return 'bit={}, scale={}'.format(self.n_bits, self.delta)
+        return 'bit={}, scale={}'.format(self.n_bits, self.scale)
