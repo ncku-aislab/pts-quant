@@ -41,7 +41,7 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
                         warmup: float = 0.0, p: float = 2.0, lr: float = 4e-5,
                         input_prob: float = 1.0, keep_gpu: bool = True, 
                         lamb_r: float = 0.2, T: float = 7.0, bn_lr: float = 1e-3, lamb_c=0.02,
-                        s_weight: float = 0.001, s_activation: float = 0.001, scale_iter: int = 10000, constraint_fn: str = 'sigmoid'):
+                        s_weight: float = 0.001, s_activation: float = 0.001, scale_iter: int = 10000, initialization_fn: str = 'sigmoid'):
     """
     Reconstruction to optimize the output from each block.
 
@@ -56,7 +56,7 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
     :param include_act_func: optimize the output after activation function
     :param b_range: temperature range
     :param warmup: proportion of iterations that no scheduling for temperature
-    :param lr: learning rate for act delta learning
+    :param lr: learning rate for act scale learning
     :param p: L_p norm minimization
     :param lamb_r: hyper-parameter for regularization
     :param T: temperature coefficient for KL divergence
@@ -65,7 +65,7 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
     :param s_weight: the weight of scale rounding regularization term
     :param s_activation: the weight of scale rounding regularization term
     :param scale_iter: scale factor training iteration
-    :param constraint_fn: constraint function for alpha, must be 'sigmoid' or 'tanh'
+    :param initialization_fn: initialization function for alpha, must be 'sigmoid' or 'tanh'
     """
 
     '''get input and set scale'''
@@ -98,7 +98,7 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
         '''weight'''
         if isinstance(module, QuantModule):
             module.weight_quantizer = PTSQuantizer(uaq=module.weight_quantizer, round_mode=round_mode, pts_mode=pts_mode,
-                                               weight_tensor=module.org_weight.data, constraint_fn=constraint_fn)
+                                               weight_tensor=module.org_weight.data, initialization_fn=initialization_fn)
             module.weight_quantizer.soft_targets = True
             w_para += [module.weight_quantizer.alpha]
             if pts_mode == 'learned_hard_sigmoid':
@@ -106,8 +106,8 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
                 module.weight_quantizer.pts_soft_targets = True
         '''activation'''
         if isinstance(module, (QuantModule, BaseQuantBlock)):
-            if module.act_quantizer.delta is not None:
-                module.act_quantizer = PTSQuantizer(uaq=module.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, constraint_fn=constraint_fn)
+            if module.act_quantizer.scale is not None:
+                module.act_quantizer = PTSQuantizer(uaq=module.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, initialization_fn=initialization_fn)
                 if pts_mode == 'learned_hard_sigmoid':
                     a_para += [module.act_quantizer.pts_alpha]
                     module.act_quantizer.pts_soft_targets = True
@@ -134,14 +134,14 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
                 if isinstance(module, QuantModule):
                     module.weight_quantizer.convert_scale()
                     module.weight_quantizer.pts_mode = 'normal'
-                    if not is_power_of_two(module.weight_quantizer.delta):
+                    if not is_power_of_two(module.weight_quantizer.scale):
                         print('Warning: weight scale is not power of two')
                         break
                 if isinstance(module, (QuantModule, BaseQuantBlock)):
-                    if module.act_quantizer.delta is not None:
+                    if module.act_quantizer.scale is not None:
                         module.act_quantizer.convert_scale()
                         module.act_quantizer.pts_mode = 'normal'
-                        if not is_power_of_two(module.act_quantizer.delta):
+                        if not is_power_of_two(module.act_quantizer.scale):
                             print('Warning: act scale is not power of two')
                             break
         idx = torch.randint(0, sz, (batch_size,))

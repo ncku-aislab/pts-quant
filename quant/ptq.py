@@ -37,10 +37,10 @@ def calibrate(model_name, weight_path, save_path, wq_params, aq_params, recon=Tr
     lamb_c = 0.02       #hyper-parameter for DC
 
     #scale factor training iteration
-    scale_iter = 10000
+    scale_iter = 2500
 
     #Constraint function
-    constraint_fn = 'tanh'
+    initialization_fn = 'tanh'
 
     # Dataset
     trainloader, testloader = build_imagenet_data(data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC", batch_size=16)
@@ -69,7 +69,7 @@ def calibrate(model_name, weight_path, save_path, wq_params, aq_params, recon=Tr
     kwargs = dict(cali_data=cali_data, batch_size=batch_size, iters=iters_w, weight=weight,
                 b_range=(b_start, b_end), warmup=warmup, opt_mode='mse',
                 lr=lr, input_prob=0.5, keep_gpu=True, 
-                lamb_r=lamb_r, T=Temp, bn_lr=bn_lr, lamb_c=lamb_c, scale_iter=scale_iter, constraint_fn=constraint_fn)
+                lamb_r=lamb_r, T=Temp, bn_lr=bn_lr, lamb_c=lamb_c, scale_iter=scale_iter, initialization_fn=initialization_fn)
     
     def set_weight_act_quantize_params(module, fp_module):
         if isinstance(module, QuantModule):
