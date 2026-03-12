@@ -25,16 +25,16 @@ within a rounding-based PTQ framework.
 ## Key Features
 
 - Post-training quantization (PTQ)
-- Powers-of-two scale quantization
+- Power-of-two scale quantization
 - Learnable scale rounding values
-- Joint optimization of weight and scale rounding value
+- Joint optimization of weight and scale rounding values
 - Hardware-friendly quantization for efficient inference
 
 ---
 
 ## Method
 
-PTS-Quant extends reconstruction-based PTQ methods such as **AdaRound** and **PD-Quant**.
+PTS-Quant extends rounding-based PTQ methods such as **AdaRound** and **PD-Quant**.
 
 The quantization scale is constrained as:
 
@@ -42,7 +42,7 @@ The quantization scale is constrained as:
 
 where `k` is an integer learned through a **scale rounding optimization process**.
 
-During reconstruction, PTS-Quant simultaneously optimizes:
+During reconstruction, PTS-Quant jointly optimizes:
 
 1. **Weight rounding values**
 2. **Scale rounding values**
@@ -54,15 +54,15 @@ This reduces quantization error while preserving the power-of-two constraint.
 ## Quantization Pipeline
 
 ```
-Full Precision Model
+Full-Precision Model
         ↓
 Calibration Dataset
         ↓
 Scale and Weight Rounding Optimization
         ↓
-Fix Scale to Powers-of-two
+Fix Scale to Power-of-two
         ↓
-Fine-tune Weight Rounding Value
+Fine-tune Weight Rounding Values
         ↓
 Power-of-Two Quantized Model
 ```
@@ -75,24 +75,24 @@ Power-of-Two Quantized Model
 PTS-Quant
 │
 ├── quant/
-│ ├── ptq.py
-│ ├── quant_layer.py
-│ ├── quant_block.py
-│ ├── quant_model.py
-│ ├── fold_bn.py
-│ ├── data_utils.py
-│ ├── layer_recon.py
-│ ├── set_act_quantize_params.py
-│ ├── set_weight_quantize_params.py
-│ └── block_recon.py
+│   ├── ptq.py
+│   ├── quant_layer.py
+│   ├── quant_block.py
+│   ├── quant_model.py
+│   ├── fold_bn.py
+│   ├── data_utils.py
+│   ├── layer_recon.py
+│   ├── set_act_quantize_params.py
+│   ├── set_weight_quantize_params.py
+│   └── block_recon.py
 │
 ├── models/
-│ ├── Resnet.py
-│ ├── regnet.py
-│ └── MobileNetV2.py
+│   ├── Resnet.py
+│   ├── regnet.py
+│   └── MobileNetV2.py
 │
 ├── configs/
-│ └── quant.yaml
+│   └── quant.yaml
 │
 ├── utils/
 │
@@ -127,15 +127,17 @@ pip install -r requirements.txt
 
 ### ImageNet
 
-Link the ImageNet dataset and organize it as follows:
+Create a symbolic link to the ImageNet dataset and organize it as follows:
 ```
-├── data/
-│ └── ImageNet-1k/ILSVRC/
-│   ├── Annotations/
-│   └── Data/CLS-LOC/
-│     ├── train/
-│     ├── val/
-│     └── test/
+data/
+└── ImageNet-1k/
+    └── ILSVRC/
+        ├── Annotations/
+        └── Data/
+            └── CLS-LOC/
+                ├── train/
+                ├── val/
+                └── test/
 ```
 
 ---
@@ -143,7 +145,7 @@ Link the ImageNet dataset and organize it as follows:
 ## Running Experiments
 
 Example: quantizing **ResNet-18**
-In config/quant.yaml:
+Set the configuration in `config/quant.yaml`:
 ```
 version: 0.1.0
 
@@ -151,11 +153,11 @@ models:
   - model_name: ResNet18
     weight_path: weights_cifar10/ResNet18.pth
     save_path: weights_cifar10/PTS-Quant/ResNet18-i4sc_PTS-Quant.pth
-    wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
-    aq_params: {'n_bits': 4, symmetric: True, 'channel_wise': False, 'scale_method': 'simple',
+    wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: True, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
     recon: True
 ```
-
-python quant/ptq.py
+Then run:
+`python quant/ptq.py`
 
