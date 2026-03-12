@@ -91,9 +91,6 @@ PTS-Quant
 │ ├── regnet.py
 │ └── MobileNetV2.py
 │
-├── data/
-│ └── ImageNet-1k/
-│
 ├── configs/
 │ └── quant.yaml
 │
@@ -101,3 +98,64 @@ PTS-Quant
 │
 └── README.md
 ```
+
+
+---
+
+## Installation
+
+### Clone the repository
+
+```
+git clone https://github.com/vcvc111222/PTS-Quant.git
+cd PTS-Quant/
+```
+
+
+### Create environment
+
+```
+conda create -n ptsquant python=3.8
+conda activate ptsquant
+pip install -r requirements.txt
+```
+
+
+---
+
+## Dataset
+
+### ImageNet
+
+Link the ImageNet dataset and organize it as follows:
+```
+├── data/
+│ └── ImageNet-1k/ILSVRC/
+│   ├── Annotations/
+│   └── Data/CLS-LOC/
+│     ├── train/
+│     ├── val/
+│     └── test/
+```
+
+---
+
+## Running Experiments
+
+Example: quantizing **ResNet-18**
+In config/quant.yaml:
+```
+version: 0.1.0
+
+models:
+  - model_name: ResNet18
+    weight_path: weights_cifar10/ResNet18.pth
+    save_path: weights_cifar10/PTS-Quant/ResNet18-i4sc_PTS-Quant.pth
+    wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'simple'}
+    aq_params: {'n_bits': 4, symmetric: True, 'channel_wise': False, 'scale_method': 'simple',
+                    'leaf_param': True, 'prob': 0.5}
+    recon: True
+```
+
+python quant/ptq.py
+
