@@ -18,16 +18,16 @@ The proposed method introduces a **learnable scale rounding value** and jointly 
 - **Weight rounding**
 - **Scale rounding**
 
-within a reconstruction-based PTQ framework.
+within a rounding-based PTQ framework.
 
 ---
 
 ## Key Features
 
 - Post-training quantization (PTQ)
-- Power-of-two scale quantization
+- Powers-of-two scale quantization
 - Learnable scale rounding values
-- Joint optimization of weight and scale rounding
+- Joint optimization of weight and scale rounding value
 - Hardware-friendly quantization for efficient inference
 
 ---
@@ -37,3 +37,67 @@ within a reconstruction-based PTQ framework.
 PTS-Quant extends reconstruction-based PTQ methods such as **AdaRound** and **PD-Quant**.
 
 The quantization scale is constrained as:
+
+`scale = 2^k`
+
+where `k` is an integer learned through a **scale rounding optimization process**.
+
+During reconstruction, PTS-Quant simultaneously optimizes:
+
+1. **Weight rounding values**
+2. **Scale rounding values**
+
+This reduces quantization error while preserving the power-of-two constraint.
+
+---
+
+## Quantization Pipeline
+
+```
+Full Precision Model
+        ↓
+Calibration Dataset
+        ↓
+Scale and Weight Rounding Optimization
+        ↓
+Fix Scale to Powers-of-two
+        ↓
+Fine-tune Weight Rounding Value
+        ↓
+Power-of-Two Quantized Model
+```
+
+---
+
+## Repository Structure
+
+```
+PTS-Quant
+│
+├── quant/
+│ ├── ptq.py
+│ ├── quant_layer.py
+│ ├── quant_block.py
+│ ├── quant_model.py
+│ ├── fold_bn.py
+│ ├── data_utils.py
+│ ├── layer_recon.py
+│ ├── set_act_quantize_params.py
+│ ├── set_weight_quantize_params.py
+│ └── block_recon.py
+│
+├── models/
+│ ├── Resnet.py
+│ ├── regnet.py
+│ └── MobileNetV2.py
+│
+├── data/
+│ └── ImageNet-1k/
+│
+├── configs/
+│ └── quant.yaml
+│
+├── utils/
+│
+└── README.md
+```
