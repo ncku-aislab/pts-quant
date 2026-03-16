@@ -1,0 +1,14 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.ipynb
+*.log
+
+data/
+result_csv/
+weights_cifar10/
+
+.vscode/
