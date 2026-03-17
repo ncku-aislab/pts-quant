@@ -25,6 +25,4 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 # but keeping it simple here:
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
-
 CMD ["/bin/bash"]
