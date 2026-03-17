@@ -107,7 +107,7 @@ PTS-Quant
 ### Clone the repository
 
 ```
-git clone https://github.com/vcvc111222/PTS-Quant.git
+git clone git@github.com:vcvc111222/PTS-Quant.git
 cd PTS-Quant/
 ```
 
