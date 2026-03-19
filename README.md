@@ -104,13 +104,7 @@ PTS-Quant
 
 ## Installation
 
-### Clone the repository
-
-```
-git clone git@github.com:vcvc111222/PTS-Quant.git
-cd PTS-Quant/
-```
-
+First clone the repository with `git clone`
 
 ### Create environment
 
@@ -161,3 +155,97 @@ models:
 Then run:
 `python quant/ptq.py`
 
+## Experimental Results
+
+We evaluate PTS-Quant on ImageNet across multiple architectures under strict power-of-two (PoT) scale constraints. The proposed method is compared with both QAT-based approaches (e.g., TQT, HMQ) and reconstruction-based PTQ methods (e.g., PD-Quant).
+
+Results show that PTS-Quant consistently improves accuracy over PD-Quant under PoT constraints, while narrowing the performance gap between PTQ and QAT methods.
+
+### 4bit Quantization(W4A4)
+
+#### ResNet-18
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| HAWQv3 | QAT | 4/4 | 68.45 | -3.02 |
+| PD-Quant (PoT) | PTQ | 4/4 | 68.70 | -2.31 |
+| **PTS-Quant** | PTQ | 4/4 | **68.77** | **-2.24** |
+
+#### ResNet-50
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| TQT | QAT | 4/8 | 74.40 | -0.80 |
+| HMQ | QAT | 3.55/8 | 76.30 | +0.15 |
+| HAWQv3 | QAT | 4/4 | 74.24 | -3.48 |
+| PD-Quant (PoT) | PTQ | 4/4 | 74.03 | -2.60 |
+| **PTS-Quant** | PTQ | 4/4 | **74.59** | **-2.04** |
+
+#### MobileNetV2
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| HMQ | QAT | 4.16/8 | 71.40 | -0.48 |
+| PD-Quant (PoT) | PTQ | 4/4 | 65.57 | -7.05 |
+| **PTS-Quant** | PTQ | 4/4 | **65.63** | **-6.99** |
+
+#### RegNetX-600MF
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| PD-Quant (PoT) | PTQ | 4/4 | 69.33 | -4.19 |
+| **PTS-Quant** | PTQ | 4/4 | **69.68** | **-3.84** |
+
+#### RegNetX-3.2GF
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| PD-Quant (PoT) | PTQ | 4/4 | 75.24 | -3.22 |
+| **PTS-Quant** | PTQ | 4/4 | **76.12** | **-2.34** |
+
+### 2bit Quantization(W2A2)
+
+#### ResNet-18
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| PD-Quant (PoT) | PTQ | 2/2 | 45.70 | -25.31 |
+| **PTS-Quant** | PTQ | 2/2 | **51.24** | **-19.77** |
+
+#### ResNet-50
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| HMQ | QAT | 2.04/8 | 75.00 | +0.15 |
+| PD-Quant (PoT) | PTQ | 2/2 | 51.91 | -24.72 |
+| **PTS-Quant** | PTQ | 2/2 | **53.20** | **-23.43** |
+
+#### MobileNetV2
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| HMQ | QAT | 2.22/8 | 65.70 | -6.18 |
+| PD-Quant (PoT) | PTQ | 2/2 | 3.43 | -69.19 |
+| **PTS-Quant** | PTQ | 2/2 | **5.25** | **-67.37** |
+
+#### RegNetX-600MF
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| PD-Quant (PoT) | PTQ | 2/2 | 27.70 | -45.82 |
+| **PTS-Quant** | PTQ | 2/2 | **33.76** | **-39.76** |
+
+#### RegNetX-3.2GF
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| PD-Quant (PoT) | PTQ | 2/2 | 42.00 | -36.46 |
+| **PTS-Quant** | PTQ | 2/2 | **49.17** | **-29.29** |
+
+Δ denotes the accuracy drop compared to the corresponding full-precision model.
+
+**Key Observations**
+
+- PTS-Quant consistently outperforms PD-Quant under power-of-two constraints across all evaluated models.
+- The performance gap between PTQ and QAT is significantly reduced.
+- The improvement is especially notable in lightweight models such as RegNet.
