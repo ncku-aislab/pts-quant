@@ -12,7 +12,7 @@ from quant import QuantModel
 def load_model(
         model_type:str,
         model_name:str,
-        weight_path:str,
+        weight_path:str = None,
         wq_params = None,
         aq_params = None,
         pretrained = True, 

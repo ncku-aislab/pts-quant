@@ -10,7 +10,7 @@ def build_imagenet_data(data_path: str = '', input_size: int = 224, batch_size: 
 
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-    traindir = os.path.join(data_path, 'train')
+    traindir = os.path.join(data_path, 'ILSVRC2012_img_train')
     valdir = os.path.join(data_path, 'val')
     train_dataset = datasets.ImageFolder(
         traindir,

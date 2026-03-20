@@ -18,8 +18,11 @@ from quant import (
     set_weight_quantize_params,
 )
 
-def calibrate(model_name, weight_path, save_path, wq_params, aq_params, recon=True, device=None):
+def calibrate(model_name, save_name, wq_params, aq_params, recon=True, device=None):
     # Hyperparameters
+    print(torch.cuda.is_available())
+    print(torch.cuda.device_count())
+    print(torch.cuda.get_device_name(0))
     num_samples = 1024  #size of the calibration dataset
     iters_w = 20000      #number of iteration for adaround
     batch_size = 8     #number of batch size
@@ -43,14 +46,14 @@ def calibrate(model_name, weight_path, save_path, wq_params, aq_params, recon=Tr
     initialization_fn = 'tanh'
 
     # Dataset
-    trainloader, testloader = build_imagenet_data(data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC", batch_size=16)
+    trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
     trainloader, calibloader = split_data(trainloader, num_samples)
     cali_data, _ = get_train_samples(calibloader, num_samples)
 
     #model
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = load_model("full", model_name, weight_path)
+    model = load_model("full", model_name)
     model.cuda()
     model.eval()
 
@@ -127,7 +130,7 @@ def calibrate(model_name, weight_path, save_path, wq_params, aq_params, recon=Tr
         os.makedirs(os.path.dirname(result_path), exist_ok=True)
 
         res = validate_model(testloader, qnn, device)
-        res["model"] = save_path
+        res["model"] = save_name
         df = pd.DataFrame([res])
         if result_path:
             df = save_csv(df, result_path, verbose=False)
