@@ -121,18 +121,24 @@ pip install -r requirements.txt
 
 ### ImageNet
 
-Create a symbolic link to the ImageNet dataset and organize it as follows:
+Please download the ImageNet (ILSVRC2012) dataset and extract it to your local storage (recommended: HDD).
+
+After extraction, organize the dataset into the following structure:
+
 ```
 data/
-└── ImageNet-1k/
-    └── ILSVRC/
-        ├── Annotations/
-        └── Data/
-            └── CLS-LOC/
-                ├── train/
-                ├── val/
-                └── test/
+└── ILSVRC2012/
+        ├── ILSVRC2012_img_train/
+        │ ├── n01440764/
+        │ ├── n01443537/
+        │ └── ...
+        └── val/
+        │ ├── n01440764/
+        │ ├── n01443537/
+        │ └── ...
 ```
+
+> **Note:** Each class should be stored in a separate folder, which is required by standard PyTorch `ImageFolder` dataloaders.
 
 ---
 
