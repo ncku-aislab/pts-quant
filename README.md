@@ -106,13 +106,19 @@ PTS-Quant
 
 First clone the repository with `git clone`
 
-### Create environment
+### Create environment with docker
 
-```
-conda create -n ptsquant python=3.8
-conda activate ptsquant
-pip install -r requirements.txt
-```
+1. Build Docker Image
+
+`bash ./docker/build.sh`
+
+2. Run Container
+
+`bash ./docker/run.sh`
+
+3. Restart Existing Container
+
+`bash ./docker/start.sh`
 
 
 ---
@@ -139,19 +145,6 @@ data/
 ```
 
 > **Note:** Each class should be stored in a separate folder, which is required by standard PyTorch `ImageFolder` dataloaders.
-
----
-
-## Docker Usage
-
-1. Build Docker Image
-`bash ./docker/build.sh`
-
-2. Run Container
-`bash ./docker/run.sh`
-
-3. Restart Existing Container
-`bash ./docker/start.sh`
 
 ---
 
