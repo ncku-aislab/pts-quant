@@ -142,6 +142,19 @@ data/
 
 ---
 
+## Docker Usage
+
+1. Build Docker Image
+`bash ./docker/build.sh`
+
+2. Run Container
+`bash ./docker/run.sh`
+
+3. Restart Existing Container
+`bash ./docker/start.sh`
+
+---
+
 ## Running Experiments
 
 Example: quantizing **ResNet-18**
