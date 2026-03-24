@@ -22,7 +22,7 @@ def calibrate(model_name, save_name, wq_params, aq_params, recon=True, device=No
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
     iters_w = 20000      #number of iteration for adaround
-    batch_size = 8     #number of batch size
+    batch_size = 16     #number of batch size
     weight = 0.01       #weight of rounding cost vs the reconstruction loss
 
     b_start = 20        #temperature at the beginning of calibration
@@ -40,7 +40,7 @@ def calibrate(model_name, save_name, wq_params, aq_params, recon=True, device=No
     scale_iter = 2500
 
     #Constraint function
-    initialization_fn = 'tanh'
+    initialization_fn = 'tanh'  #initialization function for the rounding value
 
     # Dataset
     trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
@@ -108,7 +108,8 @@ def calibrate(model_name, save_name, wq_params, aq_params, recon=True, device=No
 
         # Calibration
         recon_model(qnn, fp_model)
-
+        
+        # Set the quant model to the inference mode
         qnn.set_quant_state(weight_quant=True, act_quant=True)
 
         for module in qnn.modules():

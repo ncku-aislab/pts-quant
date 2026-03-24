@@ -119,11 +119,8 @@ class UniformAffineQuantizer(nn.Module):
 
     def forward(self, x: torch.Tensor):
         if self.inited is False:
-            if self.leaf_param:
-                self.scale, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
-            else:
-                self.scale, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
-        
+            self.scale, self.zero_point = self.init_quantization_scale(x.clone().detach(), self.channel_wise)
+            
         quant_min, quant_max = self.get_qrange()
 
         # start quantization
