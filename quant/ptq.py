@@ -20,9 +20,6 @@ from quant import (
 
 def calibrate(model_name, save_name, wq_params, aq_params, recon=True, device=None):
     # Hyperparameters
-    print(torch.cuda.is_available())
-    print(torch.cuda.device_count())
-    print(torch.cuda.get_device_name(0))
     num_samples = 1024  #size of the calibration dataset
     iters_w = 20000      #number of iteration for adaround
     batch_size = 8     #number of batch size
