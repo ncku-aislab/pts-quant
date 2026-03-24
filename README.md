@@ -97,8 +97,8 @@ PTS-Quant
 ├── utils/
 │
 ├── docker/
-│   └── build.sh
-│   └── run.sh
+│   ├── build.sh
+│   ├── run.sh
 │   └── start.sh
 │
 └── README.md
