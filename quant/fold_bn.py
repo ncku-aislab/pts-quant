@@ -4,7 +4,7 @@ import torch.nn.init as init
 
 
 class StraightThrough(nn.Module):
-    def __int__(self):
+    def __init__(self):
         super().__init__()
 
     def forward(self, input):
@@ -45,7 +45,7 @@ def fold_bn_into_conv(conv_module, bn_module):
     bn_module.running_mean = bn_module.bias.data
     bn_module.running_var = bn_module.weight.data ** 2
 
-
+'''
 def reset_bn(module: nn.BatchNorm2d):
     if module.track_running_stats:
         module.running_mean.zero_()
@@ -55,6 +55,7 @@ def reset_bn(module: nn.BatchNorm2d):
     if module.affine:
         init.ones_(module.weight)
         init.zeros_(module.bias)
+'''
 
 
 def is_bn(m):
@@ -79,7 +80,7 @@ def search_fold_and_remove_bn(model):
             prev = search_fold_and_remove_bn(m)
     return prev
 
-
+'''
 def search_fold_and_reset_bn(model):
     model.eval()
     prev = None
@@ -90,4 +91,4 @@ def search_fold_and_reset_bn(model):
         else:
             search_fold_and_reset_bn(m)
         prev = m
-
+'''
