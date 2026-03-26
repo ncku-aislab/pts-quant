@@ -379,7 +379,7 @@ class PTSQuantizer(nn.Module):
         self.sym = uaq.sym
         self.signed = uaq.signed
         self.scale = uaq.scale
-        self.log2_scale_floor = None
+        self.log2_scale_floor = None    # The floor of the scale's exponent
         self.zero_point = uaq.zero_point
         self.n_levels = uaq.n_levels
         self.leaf_param = uaq.leaf_param #Check if quantizer is for weight or activation
@@ -397,7 +397,6 @@ class PTSQuantizer(nn.Module):
             self.soft_targets = False
             # params for sigmoid function
             self.gamma, self.zeta = -0.1, 1.1
-            self.beta = 2/3
             self.init_alpha(x=weight_tensor.clone())
 
         # PTS quantizer parameters
@@ -406,7 +405,6 @@ class PTSQuantizer(nn.Module):
         self.pts_soft_targets = False
         # params for sigmoid function
         self.pts_gamma, self.pts_zeta = -0.1, 1.1
-        self.pts_beta = 2/3
         self.init_pts_alpha()
     
     def get_qrange(self):

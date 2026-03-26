@@ -39,9 +39,9 @@ def find_unquantized_module(model: torch.nn.Module, module_list: list = [], name
 def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantModule, fp_layer: QuantModule,
                         cali_data: torch.Tensor,batch_size: int = 16, iters: int = 20000, weight: float = 0.001,
                         opt_mode: str = 'mse', b_range: tuple = (20, 2),
-                        warmup: float = 0.0, p: float = 2.0, lr: float = 4e-5, input_prob: float = 1.0, 
+                        warmup: float = 0.2, p: float = 2.0, lr: float = 4e-5, input_prob: float = 1.0, 
                         keep_gpu: bool = True, lamb_r: float = 0.2, T: float = 7.0, bn_lr: float = 1e-3, lamb_c=0.02,
-                        s_weight: float = 0.001, s_activation: float = 0.001, scale_iter: int = 10000, initialization_fn: str = 'sigmoid'):
+                        scale_iter: int = 2500, initialization_fn: str = 'sigmoid'):
     """
     Reconstruction to optimize the output from each layer.
 
@@ -52,18 +52,14 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
     :param iters: optimization iterations for reconstruction,
     :param weight: the weight of rounding regularization term
     :param opt_mode: optimization mode
-    :param asym: asymmetric optimization designed in AdaRound, use quant input to reconstruct fp output
-    :param include_act_func: optimize the output after activation function
     :param b_range: temperature range
     :param warmup: proportion of iterations that no scheduling for temperature
-    :param lr: learning rate for act scale learning
+    :param lr: not used now, used in PD-Quant for act scale learning
     :param p: L_p norm minimization
     :param lamb_r: hyper-parameter for regularization
     :param T: temperature coefficient for KL divergence
     :param bn_lr: learning rate for DC
     :param lamb_c: hyper-parameter for DC
-    :param s_weight: the weight of scale rounding regularization term
-    :param s_activation: the weight of scale rounding regularization term
     :param scale_iter: scale factor training iteration
     :param initialization_fn: initialization function for alpha, must be 'sigmoid' or 'tanh'
     """
@@ -71,7 +67,6 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
     '''get input and set scale'''
     cached_inps = get_init(model, layer, cali_data, batch_size=batch_size,
                                         input_prob=True, keep_gpu=False).pin_memory()
-    print(layer.weight_quantizer.zero_point)
     cached_outs, cached_output, cur_syms = get_dc_fp_init(fp_model, fp_layer, cali_data, batch_size=batch_size,
                                         input_prob=True, keep_gpu=False, bn_lr=bn_lr, lamb=lamb_c)
     cached_outs, cached_output, cur_syms = cached_outs.pin_memory(), cached_output.pin_memory(), cur_syms.pin_memory()
@@ -79,8 +74,6 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
 
     '''set state'''
     cur_weight, cur_act = True, True
-
-    
     
     global include
     module_list, name_list, include = [], [], False
@@ -109,7 +102,8 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
 
     '''activation scale'''
     if layer.act_quantizer.scale is not None:
-        layer.act_quantizer = PTSQuantizer(uaq=layer.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, initialization_fn=initialization_fn)
+        layer.act_quantizer = PTSQuantizer(uaq=layer.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, 
+                                                initialization_fn=initialization_fn)
         if pts_mode == 'learned_hard_sigmoid':
             a_para += [layer.act_quantizer.pts_alpha]
             layer.act_quantizer.pts_soft_targets = True
@@ -128,8 +122,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
     rec_loss = opt_mode
     loss_func = LossFunction(layer, round_loss=loss_mode, weight=weight,
                              max_count=iters, rec_loss=rec_loss, b_range=b_range,
-                             decay_start=0, warmup=warmup, p=p, lam=lamb_r, T=T, 
-                             s_weight=s_weight, s_activation=s_activation)
+                             decay_start=0, warmup=warmup, p=p, lam=lamb_r, T=T)
     device = 'cuda'
     sz = cached_inps.size(0)
     for i in range(iters):
@@ -208,9 +201,7 @@ class LossFunction:
                  warmup: float = 0.0,
                  p: float = 2.,
                  lam: float = 1.0,
-                 T: float = 7.0,
-                 s_weight: float = 0.001,
-                 s_activation: float = 0.001):
+                 T: float = 7.0):
 
         self.layer = layer
         self.round_loss = round_loss
@@ -220,10 +211,6 @@ class LossFunction:
         self.p = p
         self.lam = lam
         self.T = T
-
-        # for scale parameter
-        self.s_weight = s_weight
-        self.s_activation = s_activation
 
         self.temp_decay = LinearTempDecay(max_count, rel_start_decay=warmup + (1 - warmup) * decay_start,
                                           start_b=b_range[0], end_b=b_range[1])

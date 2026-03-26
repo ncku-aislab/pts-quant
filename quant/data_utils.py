@@ -159,9 +159,6 @@ class GetDcFpLayerInpOut:
     
     def own_loss(self, A, B):
         return (A - B).norm()**2 / B.size(0)
-    
-    def relative_loss(self, A, B):
-        return (A-B).abs().mean()/A.abs().mean()
 
     def __call__(self, model_input):
         self.model.set_quant_state(False, False)

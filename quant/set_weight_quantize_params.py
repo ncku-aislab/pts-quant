@@ -18,6 +18,8 @@ def set_weight_quantize_params(model):
             module.weight_quantizer(module.weight)
             module.weight_quantizer.set_inited(True)
 
+
+# Not used now, maybe used in the future
 def save_quantized_weight(model):
     for module in model.modules():
         if isinstance(module, QuantModule):

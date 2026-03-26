@@ -38,10 +38,10 @@ def find_unquantized_module(model: torch.nn.Module, module_list: list = [], name
 def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQuantBlock, fp_block: BaseQuantBlock,
                         cali_data: torch.Tensor, batch_size: int = 16, iters: int = 20000, weight: float = 0.01, 
                         opt_mode: str = 'mse', b_range: tuple = (20, 2),
-                        warmup: float = 0.0, p: float = 2.0, lr: float = 4e-5,
+                        warmup: float = 0.2, p: float = 2.0, lr: float = 4e-5,
                         input_prob: float = 1.0, keep_gpu: bool = True, 
                         lamb_r: float = 0.2, T: float = 7.0, bn_lr: float = 1e-3, lamb_c=0.02,
-                        s_weight: float = 0.001, s_activation: float = 0.001, scale_iter: int = 10000, initialization_fn: str = 'sigmoid'):
+                        scale_iter: int = 10000, initialization_fn: str = 'sigmoid'):
     """
     Reconstruction to optimize the output from each block.
 
@@ -52,18 +52,14 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
     :param iters: optimization iterations for reconstruction,
     :param weight: the weight of rounding regularization term
     :param opt_mode: optimization mode
-    :param asym: asymmetric optimization designed in AdaRound, use quant input to reconstruct fp output
-    :param include_act_func: optimize the output after activation function
     :param b_range: temperature range
     :param warmup: proportion of iterations that no scheduling for temperature
-    :param lr: learning rate for act scale learning
+    :param lr: not used now, used in PD-Quant for act scale learning
     :param p: L_p norm minimization
     :param lamb_r: hyper-parameter for regularization
     :param T: temperature coefficient for KL divergence
     :param bn_lr: learning rate for DC
     :param lamb_c: hyper-parameter for DC
-    :param s_weight: the weight of scale rounding regularization term
-    :param s_activation: the weight of scale rounding regularization term
     :param scale_iter: scale factor training iteration
     :param initialization_fn: initialization function for alpha, must be 'sigmoid' or 'tanh'
     """
@@ -124,8 +120,7 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
     loss_mode = 'relaxation'
     rec_loss = opt_mode
     loss_func = LossFunction(block, round_loss=loss_mode, weight=weight, max_count=iters, rec_loss=rec_loss,
-                             b_range=b_range, decay_start=0, warmup=warmup, p=p, lam=lamb_r, T=T,
-                             s_weight=s_weight, s_activation=s_activation)
+                             b_range=b_range, decay_start=0, warmup=warmup, p=p, lam=lamb_r, T=T)
     device = 'cuda'
     sz = cached_inps.size(0)
     for i in range(iters):
@@ -219,9 +214,7 @@ class LossFunction:
                  warmup: float = 0.0,
                  p: float = 2.,
                  lam: float = 1.0,
-                 T: float = 7.0,
-                 s_weight: float = 0.001,
-                 s_activation: float = 0.001):
+                 T: float = 7.0):
 
         self.block = block
         self.round_loss = round_loss
@@ -231,10 +224,6 @@ class LossFunction:
         self.p = p
         self.lam = lam
         self.T = T
-
-        # for scale parameter
-        self.s_weight = s_weight
-        self.s_activation = s_activation
 
         self.temp_decay = LinearTempDecay(max_count, rel_start_decay=warmup + (1 - warmup) * decay_start,
                                           start_b=b_range[0], end_b=b_range[1])
