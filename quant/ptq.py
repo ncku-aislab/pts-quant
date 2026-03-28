@@ -18,7 +18,7 @@ from quant import (
     set_weight_quantize_params,
 )
 
-def calibrate(model_name, save_name, wq_params, aq_params, recon=True, device=None):
+def calibrate(model_name, save_name, wq_params, aq_params, device=None):
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
     iters_w = 20000      #number of iteration for adaround
