@@ -41,7 +41,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
                         opt_mode: str = 'mse', b_range: tuple = (20, 2),
                         warmup: float = 0.2, p: float = 2.0, lr: float = 4e-5, input_prob: float = 1.0, 
                         keep_gpu: bool = True, lamb_r: float = 0.2, T: float = 7.0, bn_lr: float = 1e-3, lamb_c=0.02,
-                        scale_iter: int = 2500, initialization_fn: str = 'sigmoid'):
+                        scale_iter: int = 2500, constraint_fn: str = 'sigmoid', initialization_fn: str = 'sigmoid', joint_training: bool = True):
     """
     Reconstruction to optimize the output from each layer.
 
@@ -61,7 +61,9 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
     :param bn_lr: learning rate for DC
     :param lamb_c: hyper-parameter for DC
     :param scale_iter: scale factor training iteration
-    :param initialization_fn: initialization function for alpha, must be 'sigmoid' or 'tanh'
+    :param constraint_fn: constraint function for the rounding value, must be 'sigmoid' or 'tanh'
+    :param initialization_fn: initialization function for alpha, must be 'sigmoid' or 'tanh' or 'zero' or 'random'
+    :param joint_training: whether to train the weight and activation scale jointly, must be True or False
     """
 
     '''get input and set scale'''
@@ -92,7 +94,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
 
     '''weight'''
     layer.weight_quantizer = PTSQuantizer(uaq=layer.weight_quantizer, round_mode=round_mode, pts_mode=pts_mode,
-                                               weight_tensor=layer.org_weight.data, initialization_fn=initialization_fn)
+                                               weight_tensor=layer.org_weight.data, constraint_fn=constraint_fn, initialization_fn=initialization_fn)
     layer.weight_quantizer.soft_targets = True      
     w_para += [layer.weight_quantizer.alpha]
     #weight scale
@@ -103,7 +105,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
     '''activation scale'''
     if layer.act_quantizer.scale is not None:
         layer.act_quantizer = PTSQuantizer(uaq=layer.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, 
-                                                initialization_fn=initialization_fn)
+                                                constraint_fn=constraint_fn, initialization_fn=initialization_fn)
         if pts_mode == 'learned_hard_sigmoid':
             a_para += [layer.act_quantizer.pts_alpha]
             layer.act_quantizer.pts_soft_targets = True
@@ -168,18 +170,42 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
         err = loss_func(out_drop, cur_out, output, output_fp)
 
         err.backward(retain_graph=True)
-        if w_opt:
-            w_opt.step()
-        if ws_opt and i < scale_iter:
-            ws_opt.step()
-        if a_opt and i < scale_iter:
-            a_opt.step()
-        if scheduler:
-            scheduler.step()
-        if ws_scheduler and i < scale_iter:
-            ws_scheduler.step()
-        if a_scheduler and i < scale_iter:
-            a_scheduler.step()
+        # Stage 1: i < scale_iter
+        if i < scale_iter:
+            if joint_training:
+                # Joint training: update both weight rounding and scale rounding
+                if w_opt:
+                    w_opt.step()
+                if ws_opt:
+                    ws_opt.step()
+                if a_opt:
+                    a_opt.step()
+
+                if scheduler:
+                    scheduler.step()
+                if ws_scheduler:
+                    ws_scheduler.step()
+                if a_scheduler:
+                    a_scheduler.step()
+            else:
+                # Separate training: update only scale rounding
+                if ws_opt:
+                    ws_opt.step()
+                if a_opt:
+                    a_opt.step()
+
+                if ws_scheduler:
+                    ws_scheduler.step()
+                if a_scheduler:
+                    a_scheduler.step()
+
+        # Stage 2: i >= scale_iter
+        else:
+            # Only update weight rounding
+            if w_opt:
+                w_opt.step()
+            if scheduler:
+                scheduler.step()
     torch.cuda.empty_cache()
 
     layer.weight_quantizer.soft_targets = False

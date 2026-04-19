@@ -41,7 +41,7 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
                         warmup: float = 0.2, p: float = 2.0, lr: float = 4e-5,
                         input_prob: float = 1.0, keep_gpu: bool = True, 
                         lamb_r: float = 0.2, T: float = 7.0, bn_lr: float = 1e-3, lamb_c=0.02,
-                        scale_iter: int = 10000, initialization_fn: str = 'sigmoid'):
+                        scale_iter: int = 10000, constraint_fn: str = 'sigmoid', initialization_fn: str = 'sigmoid', joint_training: bool = True):
     """
     Reconstruction to optimize the output from each block.
 
@@ -61,7 +61,9 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
     :param bn_lr: learning rate for DC
     :param lamb_c: hyper-parameter for DC
     :param scale_iter: scale factor training iteration
-    :param initialization_fn: initialization function for alpha, must be 'sigmoid' or 'tanh'
+    :param constraint_fn: constraint function for the rounding value, must be 'sigmoid' or 'tanh'
+    :param initialization_fn: initialization function for alpha, must be 'sigmoid' or 'tanh' or 'zero' or 'random'
+    :param joint_training: whether to train the weight and activation scale jointly, must be True or False
     """
 
     '''get input and set scale'''
@@ -94,7 +96,7 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
         '''weight'''
         if isinstance(module, QuantModule):
             module.weight_quantizer = PTSQuantizer(uaq=module.weight_quantizer, round_mode=round_mode, pts_mode=pts_mode,
-                                               weight_tensor=module.org_weight.data, initialization_fn=initialization_fn)
+                                               weight_tensor=module.org_weight.data, constraint_fn=constraint_fn, initialization_fn=initialization_fn)
             module.weight_quantizer.soft_targets = True
             w_para += [module.weight_quantizer.alpha]
             if pts_mode == 'learned_hard_sigmoid':
@@ -103,7 +105,7 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
         '''activation'''
         if isinstance(module, (QuantModule, BaseQuantBlock)):
             if module.act_quantizer.scale is not None:
-                module.act_quantizer = PTSQuantizer(uaq=module.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, initialization_fn=initialization_fn)
+                module.act_quantizer = PTSQuantizer(uaq=module.act_quantizer, round_mode=round_mode, pts_mode=pts_mode, constraint_fn=constraint_fn, initialization_fn=initialization_fn)
                 if pts_mode == 'learned_hard_sigmoid':
                     a_para += [module.act_quantizer.pts_alpha]
                     module.act_quantizer.pts_soft_targets = True
@@ -173,18 +175,42 @@ def block_reconstruction(model: QuantModel, fp_model: QuantModel, block: BaseQua
         err = loss_func(out_drop, cur_out, output, output_fp)
 
         err.backward(retain_graph=True)
-        if w_opt:
-            w_opt.step()
-        if ws_opt and i < scale_iter:
-            ws_opt.step()
-        if a_opt and i < scale_iter:
-            a_opt.step()
-        if scheduler:
-            scheduler.step()
-        if ws_scheduler and i < scale_iter:
-            ws_scheduler.step()
-        if a_scheduler and i < scale_iter:
-            a_scheduler.step()
+        # Stage 1: i < scale_iter
+        if i < scale_iter:
+            if joint_training:
+                # Joint training: update both weight rounding and scale rounding
+                if w_opt:
+                    w_opt.step()
+                if ws_opt:
+                    ws_opt.step()
+                if a_opt:
+                    a_opt.step()
+
+                if scheduler:
+                    scheduler.step()
+                if ws_scheduler:
+                    ws_scheduler.step()
+                if a_scheduler:
+                    a_scheduler.step()
+            else:
+                # Separate training: update only scale rounding
+                if ws_opt:
+                    ws_opt.step()
+                if a_opt:
+                    a_opt.step()
+
+                if ws_scheduler:
+                    ws_scheduler.step()
+                if a_scheduler:
+                    a_scheduler.step()
+
+        # Stage 2: i >= scale_iter
+        else:
+            # Only update weight rounding
+            if w_opt:
+                w_opt.step()
+            if scheduler:
+                scheduler.step()
         
     torch.cuda.empty_cache()
     for module in block.modules():

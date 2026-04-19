@@ -6,3 +6,7 @@ models:
     wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: True, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [2500]
+    joint_training: True

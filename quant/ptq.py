@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -18,7 +19,7 @@ from quant import (
     set_weight_quantize_params,
 )
 
-def calibrate(model_name, save_name, wq_params, aq_params, device=None):
+def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initialization_fn, scale_iter, joint_training, device=None):
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
     iters_w = 20000      #number of iteration for adaround
@@ -37,10 +38,12 @@ def calibrate(model_name, save_name, wq_params, aq_params, device=None):
     lamb_c = 0.02       #hyper-parameter for DC
 
     #scale factor training iteration
-    scale_iter = 2500
+    scale_grid = scale_iter   #scale factor training iteration from config file
 
     #Constraint function
-    initialization_fn = 'tanh'  #initialization function for the rounding value
+    constraint_fn = constraint_fn   #constraint function for the rounding value from config file
+    initialization_fn = initialization_fn
+    joint_training = joint_training
 
     # Dataset
     trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
@@ -69,7 +72,8 @@ def calibrate(model_name, save_name, wq_params, aq_params, device=None):
     kwargs = dict(cali_data=cali_data, batch_size=batch_size, iters=iters_w, weight=weight,
                 b_range=(b_start, b_end), warmup=warmup, opt_mode='mse',
                 lr=lr, input_prob=0.5, keep_gpu=True, 
-                lamb_r=lamb_r, T=Temp, bn_lr=bn_lr, lamb_c=lamb_c, scale_iter=scale_iter, initialization_fn=initialization_fn)
+                lamb_r=lamb_r, T=Temp, bn_lr=bn_lr, lamb_c=lamb_c, scale_iter=scale_grid[0], 
+                constraint_fn=constraint_fn, initialization_fn=initialization_fn, joint_training=joint_training)
     
     def set_weight_act_quantize_params(module, fp_module):
         if isinstance(module, QuantModule):
@@ -92,9 +96,8 @@ def calibrate(model_name, save_name, wq_params, aq_params, device=None):
             else:
                 recon_model(module, fp_module)
     # Start calibration
-    scale_grid = [2500]
-    for scale_iter in scale_grid:
-        kwargs['scale_iter'] = scale_iter
+    for s_iter in scale_grid:
+        kwargs['scale_iter'] = s_iter
         qnn = QuantModel(model=model, weight_quant_params=wq_params, act_quant_params=aq_params)
         qnn.cuda()
         qnn.eval()
@@ -146,9 +149,20 @@ def calibrate(model_name, save_name, wq_params, aq_params, device=None):
     
 
 if __name__ == "__main__":
-    #config
-    args = load_config("config/quant.yaml")
-    
-    #Calibrate
+    parser = argparse.ArgumentParser(description="PTQ calibration script")
+
+    parser.add_argument(
+        "--config",
+        type=str,
+        required=True,
+        help="Path to config yaml file"
+    )
+
+    args_cli = parser.parse_args()
+
+    # load yaml config
+    args = load_config(args_cli.config)
+
+    # run calibration
     for model_config in args.models:
         calibrate(**model_config)

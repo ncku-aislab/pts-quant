@@ -166,11 +166,68 @@ models:
     wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: True, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
-    recon: True
-
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [2500]
+    joint_training: True
 ```
-Then run:
-`python quant/ptq.py`
+### Model
+The following models are supported:
+- ResNet18
+- ResNet50
+- MobileNetV2
+- RegNetX-600MF
+- RegNetX-3.2GF
+
+You can define multiple models in the config:
+```
+models:
+  - model_name: ResNet18
+    ...
+  - model_name: ResNet50
+    ...
+```
+
+### Constraint function
+Controls how the rounding value is mapped to a valid range during training:
+- sigmoid
+- tanh
+
+### Initialization function
+Defines how rounding values are initialized:
+- sigmoid
+        FP32-based initialization using inverse sigmoid
+- tanh
+        FP32-based initialization using inverse tanh
+- zero
+        Initialize to α = 0 → θ = 0.5
+- random
+        Random initialization near α ≈ 0 → θ ≈ 0.5
+
+### Scale iteration (sacle_iter)
+Defines the transition point between Stage 1 and Stage 2.
+- `i < scale_iter` → Stage 1 (scale optimization)
+- `i ≥ scale_iter` → Stage 2 (scale fixed to PoT)
+Supports multiple values for ablation:
+```
+scale_iter: [0, 1000, 2500, 5000]
+```
+
+### Joint Training (joint_training)
+Controls optimization behavior in Stage 1:
+- `True`
+        Jointly update:
+        - weight rounding value
+        - scale rounding value
+- `False`
+        Only update:
+        - scale rounding value
+
+Stage 2 always updates weight rounding only.
+
+### Example Usage
+After editing the configuration file, run:
+`python quant/ptq.py --config config/quant.yaml`
 
 ## Experimental Results
 

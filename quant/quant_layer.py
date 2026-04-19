@@ -372,7 +372,7 @@ class QuantModule(nn.Module):
 
 class PTSQuantizer(nn.Module):
     def __init__(self, uaq: UniformAffineQuantizer, weight_tensor: torch.Tensor = None,
-                round_mode='learned_hard_sigmoid', pts_mode='learned_hard_sigmoid', initialization_fn='sigmoid'):
+                round_mode='learned_hard_sigmoid', pts_mode='learned_hard_sigmoid', constraint_fn='sigmoid', initialization_fn='sigmoid'):
         super(PTSQuantizer, self).__init__()
         # copying all attributes from UniformAffineQuantizer
         self.n_bits = uaq.n_bits
@@ -386,8 +386,13 @@ class PTSQuantizer(nn.Module):
         self.is_training = uaq.is_training
         self.prob = uaq.prob
 
-        assert initialization_fn in ['sigmoid', 'tanh'], "initialization_fn must be 'sigmoid' or 'tanh'"
-        self.constraint_fn = 'sigmoid'
+        # Supported options
+        assert initialization_fn in ['sigmoid', 'tanh', 'zero', 'random'], \
+            "init_method must be one of ['sigmoid', 'tanh', 'zero', 'random']"
+        assert constraint_fn in ['sigmoid', 'tanh'], \
+            "constraint_fn must be one of ['sigmoid', 'tanh']"
+
+        self.constraint_fn = constraint_fn
         self.initialization_fn = initialization_fn
 
         # Adaround quantizer parameters (if quantizer for weight)
@@ -497,24 +502,57 @@ class PTSQuantizer(nn.Module):
     def init_alpha(self, x: torch.Tensor):
         x_floor = torch.floor(x / self.scale)
         if self.round_mode == 'learned_hard_sigmoid':
-            print('Init alpha to be FP32')
-            rest = (x / self.scale) - x_floor  # rest of rounding [0, 1)
-            alpha = self.inverse_constraint(rest)
-            self.alpha = nn.Parameter(alpha)
+
+            if self.initialization_fn in ['sigmoid', 'tanh']:
+                print(f'Init alpha to be FP32 with {self.initialization_fn}')
+                rest = (x / self.delta) - x_floor  # rest of rounding [0, 1)
+                alpha = self.inverse_constraint(rest)
+                self.alpha = nn.Parameter(alpha)
+
+            elif self.initialization_fn == 'zero':
+                print('Init alpha to be 0 (theta=0.5)')
+                # alpha = 0 => sigmoid/tanh-mapped theta = 0.5
+                self.alpha = nn.Parameter(torch.zeros_like(x))
+
+            elif self.initialization_fn == 'random':
+                print('Init alpha randomly near 0 (theta near 0.5)')
+                sigma = 0.05
+                self.alpha = nn.Parameter(torch.randn_like(x) * sigma)
+
+            else:
+                raise ValueError(f"Unsupported initialization_fn: {self.initialization_fn}")
+
         else:
             raise NotImplementedError
             
     def init_pts_alpha(self):
         if self.pts_mode == 'learned_hard_sigmoid':
-            log2_scale = torch.log2(self.scale)
+            log2_scale = torch.log2(self.delta)
             s_floor = torch.floor(log2_scale)
-            print('Init pts_alpha to be FP32')
-            rest = log2_scale - s_floor  # rest of rounding [0, 1)
-            pts_alpha = self.inverse_constraint(rest)
-            self.pts_alpha = nn.Parameter(pts_alpha)
-            self.log2_scale_floor = s_floor
+
+            if self.initialization_fn in ['sigmoid', 'tanh']:
+                print(f'Init pts_alpha to be FP32 with {self.initialization_fn}')
+                rest = log2_scale - s_floor  # rest of rounding [0, 1)
+                pts_alpha = self.inverse_constraint(rest)
+                self.pts_alpha = nn.Parameter(pts_alpha)
+
+            elif self.initialization_fn == 'zero':
+                print('Init pts_alpha to be 0 (theta=0.5)')
+                self.pts_alpha = nn.Parameter(torch.zeros_like(log2_scale))
+
+            elif self.initialization_fn == 'random':
+                print('Init pts_alpha randomly near 0 (theta near 0.5)')
+                sigma_s = 0.05
+                self.pts_alpha = nn.Parameter(torch.randn_like(log2_scale) * sigma_s)
+
+            else:
+                raise ValueError(f"Unsupported initialization_fn: {self.initialization_fn}")
+
+            self.log2_delta_floor = s_floor
+
         elif self.pts_mode == 'normal':
             pass
+
         else:
             raise NotImplementedError
     
