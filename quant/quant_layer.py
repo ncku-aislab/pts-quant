@@ -505,7 +505,7 @@ class PTSQuantizer(nn.Module):
 
             if self.initialization_fn in ['sigmoid', 'tanh']:
                 print(f'Init alpha to be FP32 with {self.initialization_fn}')
-                rest = (x / self.delta) - x_floor  # rest of rounding [0, 1)
+                rest = (x / self.scale) - x_floor  # rest of rounding [0, 1)
                 alpha = self.inverse_constraint(rest)
                 self.alpha = nn.Parameter(alpha)
 
@@ -527,7 +527,7 @@ class PTSQuantizer(nn.Module):
             
     def init_pts_alpha(self):
         if self.pts_mode == 'learned_hard_sigmoid':
-            log2_scale = torch.log2(self.delta)
+            log2_scale = torch.log2(self.scale)
             s_floor = torch.floor(log2_scale)
 
             if self.initialization_fn in ['sigmoid', 'tanh']:
@@ -548,7 +548,7 @@ class PTSQuantizer(nn.Module):
             else:
                 raise ValueError(f"Unsupported initialization_fn: {self.initialization_fn}")
 
-            self.log2_delta_floor = s_floor
+            self.log2_scale_floor = s_floor
 
         elif self.pts_mode == 'normal':
             pass
