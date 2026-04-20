@@ -10,6 +10,7 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
+    result_path: result_csv/RegNetX-600MF.csv
 
   - model_name: RegNetX-600MF
     save_name: RegNetX-600MF-i2sc
@@ -20,3 +21,4 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
+    result_path: result_csv/RegNetX-600MF.csv

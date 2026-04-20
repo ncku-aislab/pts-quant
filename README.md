@@ -227,7 +227,11 @@ Controls optimization behavior in Stage 1:
 Stage 2 always updates weight rounding only.
 
 ### Result Path
-The path you want to save your results
+Specifies the file path for saving experiment results.
+
+- Type: `str`
+- If not provided, the default path is `result_csv/ImageNet.csv`.
+- The parent directory will be automatically created if it does not exist.
 
 ### Example Usage
 After editing the configuration file, run:

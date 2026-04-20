@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import copy
 import pandas as pd
+from typing import TypedDict, NotRequired, List
 
 from utils import *
 from quant import (
@@ -18,6 +19,36 @@ from quant import (
     QuantModel,
     set_weight_quantize_params,
 )
+
+class ExperimentConfig(TypedDict):
+    model_name: str
+    save_name: str
+    wq_params: QuantParams
+    aq_params: QuantParams
+    constraint_fn: str
+    initialization_fn: str
+    scale_iter: List[int]
+    joint_training: bool
+    result_path: NotRequired[str]
+
+def build_result_metadata(
+    save_name: str,
+    initialization_fn: str,
+    constraint_fn: str,
+    s_iter: int,
+    wq_params: QuantParams,
+    aq_params: QuantParams,
+    joint_training: bool,
+) -> dict:
+    return {
+        "model": save_name,
+        "init_fn": initialization_fn,
+        "constraint_fn": constraint_fn,
+        "s_iter": s_iter,
+        "w_bits": wq_params["n_bits"],
+        "a_bits": aq_params["n_bits"],
+        "joint_training": joint_training,
+        }
 
 def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initialization_fn, scale_iter, joint_training, result_path=None, device=None):
     # Hyperparameters
@@ -131,19 +162,20 @@ def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initia
 
         res = validate_model(testloader, qnn, device)
 
-        res["model"] = save_name
-        res["init_fn"] = initialization_fn
-        res["constraint_fn"] = constraint_fn
-        res["s_iter"] = s_iter
-        res["w_bits"] = wq_params["n_bits"]
-        res["a_bits"] = aq_params["n_bits"]
-        res["joint_training"] = joint_training
+        res.update(
+            build_result_metadata(
+                save_name=save_name,
+                initialization_fn=initialization_fn,
+                constraint_fn=constraint_fn,
+                s_iter=s_iter,
+                wq_params=wq_params,
+                aq_params=aq_params,
+                joint_training=joint_training,
+            )
+        )
 
         df = pd.DataFrame([res])
-
-        if result_path:
-            df = save_csv(df, result_path, verbose=False)
-            pass
+        df = save_csv(df, result_path, verbose=False)
 
         print(df)
 

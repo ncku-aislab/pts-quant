@@ -10,7 +10,7 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: False
-    result_path: result_csv/ImageNet.csv
+    result_path: result_csv/ResNet18.csv
 
   - model_name: ResNet18
     save_name: ResNet18-i2sc
@@ -21,4 +21,4 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: False
-    result_path: result_csv/ImageNet.csv
+    result_path: result_csv/ResNet18.csv
