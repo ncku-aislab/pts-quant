@@ -170,6 +170,7 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
+    result_path: result_csv/ImageNet.csv
 ```
 ### Model
 The following models are supported:
@@ -224,6 +225,9 @@ Controls optimization behavior in Stage 1:
         - scale rounding value
 
 Stage 2 always updates weight rounding only.
+
+### Result Path
+The path you want to save your results
 
 ### Example Usage
 After editing the configuration file, run:

@@ -19,7 +19,7 @@ from quant import (
     set_weight_quantize_params,
 )
 
-def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initialization_fn, scale_iter, joint_training, device=None):
+def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initialization_fn, scale_iter, joint_training, result_path=None, device=None):
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
     iters_w = 20000      #number of iteration for adaround
@@ -125,17 +125,29 @@ def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initia
                 module.act_quantizer.convert_scale()
                 module.act_quantizer.pts_mode = 'normal'
 
-        result_path = "result_csv/ImageNet.csv"
-
         # Ensure the output directory exists
-        os.makedirs(os.path.dirname(result_path), exist_ok=True)
+        if result_path is None:
+            result_path = "result_csv/ImageNet.csv"
+        result_dir = os.path.dirname(result_path)
+        if result_dir != "":
+            os.makedirs(os.path.dirname(result_path), exist_ok=True)
 
         res = validate_model(testloader, qnn, device)
+
         res["model"] = save_name
+        res["init_fn"] = initialization_fn
+        res["constraint_fn"] = constraint_fn
+        res["s_iter"] = s_iter
+        res["w_bits"] = wq_params["n_bits"]
+        res["a_bits"] = aq_params["n_bits"]
+        res["joint_training"] = joint_training
+
         df = pd.DataFrame([res])
+
         if result_path:
             df = save_csv(df, result_path, verbose=False)
             pass
+
         print(df)
 
 
