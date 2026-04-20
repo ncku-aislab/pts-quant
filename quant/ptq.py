@@ -128,9 +128,6 @@ def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initia
         # Ensure the output directory exists
         if result_path is None:
             result_path = "result_csv/ImageNet.csv"
-        result_dir = os.path.dirname(result_path)
-        if result_dir != "":
-            os.makedirs(os.path.dirname(result_path), exist_ok=True)
 
         res = validate_model(testloader, qnn, device)
 
