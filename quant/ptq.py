@@ -20,6 +20,15 @@ from quant import (
     set_weight_quantize_params,
 )
 
+class QuantParams(TypedDict):
+    n_bits: int
+    symmetric: bool
+    channel_wise: bool
+    scale_method: str
+    leaf_param: NotRequired[bool]
+    prob: NotRequired[float]
+
+
 class ExperimentConfig(TypedDict):
     model_name: str
     save_name: str
@@ -31,26 +40,18 @@ class ExperimentConfig(TypedDict):
     joint_training: bool
     result_path: NotRequired[str]
 
-def build_result_metadata(
-    save_name: str,
-    initialization_fn: str,
-    constraint_fn: str,
-    s_iter: int,
-    wq_params: QuantParams,
-    aq_params: QuantParams,
-    joint_training: bool,
-) -> dict:
-    return {
-        "model": save_name,
-        "init_fn": initialization_fn,
-        "constraint_fn": constraint_fn,
-        "s_iter": s_iter,
-        "w_bits": wq_params["n_bits"],
-        "a_bits": aq_params["n_bits"],
-        "joint_training": joint_training,
-        }
-
-def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initialization_fn, scale_iter, joint_training, result_path=None, device=None):
+def calibrate(config: ExperimentConfig, device=None):
+    # Read config
+    model_name = config["model_name"]
+    save_name = config["save_name"]
+    wq_params = config["wq_params"]
+    aq_params = config["aq_params"]
+    constraint_fn = config["constraint_fn"]
+    initialization_fn = config["initialization_fn"]
+    scale_grid = config["scale_iter"]
+    joint_training = config["joint_training"]
+    result_path = config.get("result_path", "result_csv/ImageNet.csv")
+    
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
     iters_w = 20000      #number of iteration for adaround
@@ -67,14 +68,6 @@ def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initia
     Temp = 4.0          #temperature coefficient for KL divergence
     bn_lr = 1e-3        #learning rate for DC
     lamb_c = 0.02       #hyper-parameter for DC
-
-    #scale factor training iteration
-    scale_grid = scale_iter   #scale factor training iteration from config file
-
-    #Constraint function
-    constraint_fn = constraint_fn   #constraint function for the rounding value from config file
-    initialization_fn = initialization_fn
-    joint_training = joint_training
 
     # Dataset
     trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
@@ -129,7 +122,7 @@ def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initia
     # Start calibration
     for s_iter in scale_grid:
         kwargs['scale_iter'] = s_iter
-        qnn = QuantModel(model=model, weight_quant_params=wq_params, act_quant_params=aq_params)
+        qnn = QuantModel(copy.deepcopy(model), weight_quant_params=wq_params, act_quant_params=aq_params)
         qnn.cuda()
         qnn.eval()
 
@@ -156,23 +149,16 @@ def calibrate(model_name, save_name, wq_params, aq_params, constraint_fn, initia
                 module.act_quantizer.convert_scale()
                 module.act_quantizer.pts_mode = 'normal'
 
-        # Ensure the output directory exists
-        if result_path is None:
-            result_path = "result_csv/ImageNet.csv"
-
         res = validate_model(testloader, qnn, device)
-
-        res.update(
-            build_result_metadata(
-                save_name=save_name,
-                initialization_fn=initialization_fn,
-                constraint_fn=constraint_fn,
-                s_iter=s_iter,
-                wq_params=wq_params,
-                aq_params=aq_params,
-                joint_training=joint_training,
-            )
-        )
+        res.update({
+            "model": save_name,
+            "init_fn": initialization_fn,
+            "constraint_fn": constraint_fn,
+            "s_iter": s_iter,
+            "w_bits": wq_params["n_bits"],
+            "a_bits": aq_params["n_bits"],
+            "joint_training": joint_training,
+        })
 
         df = pd.DataFrame([res])
         df = save_csv(df, result_path, verbose=False)
@@ -206,4 +192,4 @@ if __name__ == "__main__":
 
     # run calibration
     for model_config in args.models:
-        calibrate(**model_config)
+        calibrate(model_config)
