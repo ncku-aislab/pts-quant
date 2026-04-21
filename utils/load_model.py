@@ -43,7 +43,7 @@ def load_model(
             checkpoint = load_state_dict_from_url(url=load_url, map_location='cpu', progress=True)
             model.load_state_dict(checkpoint['model'])
         return model
-    elif model_name == "RegNetX600-MF":
+    elif model_name == "RegNetX-600MF":
         # Call the model, load pretrained weights
         model = _regnetx_600m(**kwargs)
         if pretrained:
@@ -51,7 +51,7 @@ def load_model(
             checkpoint = load_state_dict_from_url(url=load_url, map_location='cpu', progress=True)
             model.load_state_dict(checkpoint)
         return model
-    elif model_name == "RegNetX3.2-GF":
+    elif model_name == "RegNetX-3.2GF":
         # Call the model, load pretrained weights
         model = _regnetx_3200m(**kwargs)
         if pretrained:
