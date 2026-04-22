@@ -5,7 +5,7 @@
 # Local experiment data / results (do NOT track)
 base/
 data/
-result_csv/
+#result_csv/
 weights_cifar10/
 weights_cifar10
 
