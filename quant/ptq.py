@@ -8,7 +8,8 @@ import torch
 import torch.nn as nn
 import copy
 import pandas as pd
-from typing import TypedDict, NotRequired, List
+from typing import TypedDict, List
+from typing_extensions import NotRequired
 
 from utils import *
 from quant import (
@@ -70,7 +71,8 @@ def calibrate(config: ExperimentConfig, device=None):
     lamb_c = 0.02       #hyper-parameter for DC
 
     # Dataset
-    trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
+    #trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
+    trainloader, testloader = build_imagenet_data(data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC", batch_size=16)
     trainloader, calibloader = split_data(trainloader, num_samples)
     cali_data, _ = get_train_samples(calibloader, num_samples)
 
