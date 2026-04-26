@@ -102,10 +102,7 @@ PTS-Quant
 │
 ├── result_csv/
 │
-├── docker/
-│   ├── build.sh
-│   ├── run.sh
-│   └── start.sh
+├── docker.sh
 │
 └── README.md
 ```
@@ -121,15 +118,15 @@ First clone the repository with `git clone ssh://git@gitlab.aislab.ee.ncku.edu.t
 
 1. Build Docker Image
 
-`bash ./docker/build.sh`
+```bash
+./docker.sh build
+```
 
-2. Run Container
+2. Run/Start Container
 
-`bash ./docker/run.sh`
-
-3. Restart Existing Container
-
-`bash ./docker/start.sh`
+```bash
+./docker.sh run
+```
 
 
 ---
