@@ -40,6 +40,128 @@ class ExperimentConfig(TypedDict):
     scale_iter: List[int]
     joint_training: bool
     result_path: NotRequired[str]
+    save_path: NotRequired[str]
+
+def _to_cpu(value):
+    if isinstance(value, torch.Tensor):
+        return value.detach().cpu()
+    return value
+
+
+def collect_quantizer_state(model: nn.Module) -> dict:
+    quantizer_state = {}
+
+    def add_quantizer_state(name: str, quantizer):
+        state = {
+            "n_bits": getattr(quantizer, "n_bits", None),
+            "scale": _to_cpu(getattr(quantizer, "scale", None)),
+            "zero_point": _to_cpu(getattr(quantizer, "zero_point", None)),
+            "alpha": _to_cpu(getattr(quantizer, "alpha", None)),
+            "pts_alpha": _to_cpu(getattr(quantizer, "pts_alpha", None)),
+            "log2_scale_floor": _to_cpu(getattr(quantizer, "log2_scale_floor", None)),
+            "round_mode": getattr(quantizer, "round_mode", None),
+            "pts_mode": getattr(quantizer, "pts_mode", None),
+            "constraint_fn": getattr(quantizer, "constraint_fn", None),
+            "initialization_fn": getattr(quantizer, "initialization_fn", None),
+        }
+        quantizer_state[name] = state
+
+    for name, module in model.named_modules():
+        if isinstance(module, QuantModule):
+            add_quantizer_state(f"{name}.weight_quantizer", module.weight_quantizer)
+            add_quantizer_state(f"{name}.act_quantizer", module.act_quantizer)
+
+        elif isinstance(module, BaseQuantBlock):
+            if hasattr(module, "act_quantizer"):
+                add_quantizer_state(f"{name}.act_quantizer", module.act_quantizer)
+
+    return quantizer_state
+
+
+def collect_quantized_weights(model: nn.Module) -> dict:
+    quantized_weights = {}
+
+    for name, module in model.named_modules():
+        if not isinstance(module, QuantModule):
+            continue
+
+        quantizer = module.weight_quantizer
+        weight = module.weight.detach()
+
+        with torch.no_grad():
+            qmin, qmax = quantizer.get_qrange()
+            scale = quantizer.scale
+            zero_point = quantizer.zero_point
+
+            if hasattr(quantizer, "alpha") and quantizer.alpha is not None:
+                weight_floor = torch.floor(weight / scale)
+                weight_int = weight_floor + (quantizer.alpha >= 0).float()
+            else:
+                weight_int = torch.round(weight / scale)
+
+            weight_int = torch.clamp(weight_int + zero_point, qmin, qmax)
+            weight_dequant = (weight_int - zero_point) * scale
+
+        quantized_weights[name] = {
+            "int_weight": weight_int.detach().cpu(),
+            "dequant_weight": weight_dequant.detach().cpu(),
+        }
+
+    return quantized_weights
+
+
+def resolve_save_path(save_path: str, save_name: str, s_iter: int, num_scale_iters: int) -> str:
+    if save_path is None:
+        return None
+
+    # If save_path is a directory, save as {save_name}_s{s_iter}.pth
+    if save_path.endswith("/") or os.path.isdir(save_path):
+        return os.path.join(save_path, f"{save_name}_s{s_iter}.pth")
+
+    # If multiple scale_iter values are used, avoid overwriting the same file
+    if num_scale_iters > 1:
+        base, ext = os.path.splitext(save_path)
+        ext = ext if ext else ".pth"
+        return f"{base}_s{s_iter}{ext}"
+
+    return save_path
+
+
+def save_quantized_checkpoint(
+    model: nn.Module,
+    config: ExperimentConfig,
+    s_iter: int,
+    save_path: str,
+) -> None:
+    if save_path is None:
+        return
+
+    final_save_path = resolve_save_path(
+        save_path=save_path,
+        save_name=config["save_name"],
+        s_iter=s_iter,
+        num_scale_iters=len(config["scale_iter"]),
+    )
+
+    save_dir = os.path.dirname(final_save_path)
+    if save_dir != "":
+        os.makedirs(save_dir, exist_ok=True)
+
+    checkpoint = {
+        "model_name": config["model_name"],
+        "save_name": config["save_name"],
+        "state_dict": model.state_dict(),
+        "quantizer_state": collect_quantizer_state(model),
+        "quantized_weights": collect_quantized_weights(model),
+        "config": dict(config),
+        "s_iter": s_iter,
+    }
+
+    torch.save(checkpoint, final_save_path)
+    print(f"Quantized checkpoint saved to {final_save_path}")
+
+
+
 
 def calibrate(config: ExperimentConfig, device=None):
     # Read config
@@ -52,10 +174,11 @@ def calibrate(config: ExperimentConfig, device=None):
     scale_grid = config["scale_iter"]
     joint_training = config["joint_training"]
     result_path = config.get("result_path", "result_csv/ImageNet.csv")
+    save_path = config.get("save_path", None)
     
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
-    iters_w = 20000      #number of iteration for adaround
+    iters_w = 2      #number of iteration for adaround
     batch_size = 16     #number of batch size
     weight = 0.01       #weight of rounding cost vs the reconstruction loss
 
@@ -166,6 +289,13 @@ def calibrate(config: ExperimentConfig, device=None):
         df = save_csv(df, result_path, verbose=False)
 
         print(df)
+
+        save_quantized_checkpoint(
+            model=qnn,
+            config=config,
+            s_iter=s_iter,
+            save_path=save_path,
+        )
 
 
     

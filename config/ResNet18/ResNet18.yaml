@@ -11,6 +11,7 @@ models:
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
     result_path: result_csv/ResNet18.csv
+    save_path: checkpoints/ResNet18/
 
   - model_name: ResNet18
     save_name: ResNet18-i2sc
@@ -22,3 +23,4 @@ models:
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
     result_path: result_csv/ResNet18.csv
+    save_path: checkpoints/ResNet18/
