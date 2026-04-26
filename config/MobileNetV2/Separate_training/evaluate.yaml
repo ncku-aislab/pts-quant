@@ -2,6 +2,7 @@ version: 0.1.0
 
 models:
   - model_name: MobileNetV2
+    mode: evaluate
     save_name: MobileNetV2-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -10,9 +11,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: False
-    result_path: result_csv/MobileNetV2.csv
+    result_path: result_csv/MobileNetV2/joint_training/evaluate.csv
+    weight_path: checkpoints/MobileNetV2/joint_training/MobileNetV2-i4sc-joint_false_s2500.pth
 
   - model_name: MobileNetV2
+    mode: evaluate
     save_name: MobileNetV2-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -20,5 +23,6 @@ models:
     constraint_fn: 'sigmoid'   #constraint function for the rounding value
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
-    joint_training: False
-    result_path: result_csv/MobileNetV2.csv
+    joint_training: True
+    result_path: result_csv/MobileNetV2/joint_training/evaluate.csv
+    weight_path: checkpoints/MobileNetV2/joint_training/MobileNetV2-i2sc-joint_false_s2500.pth

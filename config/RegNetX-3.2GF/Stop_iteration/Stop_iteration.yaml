@@ -2,6 +2,7 @@ version: 0.1.0
 
 models:
   - model_name: RegNetX-3.2GF
+    mode: reconstruction
     save_name: RegNetX-3.2GF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -10,9 +11,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/reconstruct.csv
+    save_path: checkpoints/RegNetX-3.2GF/stop_iteration/
 
   - model_name: RegNetX-3.2GF
+    mode: reconstruction
     save_name: RegNetX-3.2GF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -21,4 +24,5 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/reconstruct.csv
+    save_path: checkpoints/RegNetX-3.2GF/stop_iteration/

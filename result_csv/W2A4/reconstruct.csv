@@ -1,0 +1,2 @@
+,Acc@1,Acc@5,model,mode,init_fn,constraint_fn,s_iter,w_bits,a_bits,joint_training
+0,63.902,86.142,ResNet18-W2A4-sc,reconstruction,tanh,sigmoid,2500,2,4,True

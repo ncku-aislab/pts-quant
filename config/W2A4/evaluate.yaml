@@ -2,6 +2,7 @@ version: 0.1.0
 
 models:
   - model_name: ResNet18
+    mode: evaluate
     save_name: ResNet18-W2A4-sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -10,9 +11,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A4.csv
+    result_path: result_csv/W2A4/evaluate.csv
+    weight_path: checkpoints/W2A4/ResNet18-W2A4sc.pth
   
   - model_name: ResNet50
+    mode: evaluate
     save_name: ResNet50-W2A4-sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -21,9 +24,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A4.csv
+    result_path: result_csv/W2A4/evaluate.csv
+    save_path: checkpoints/W2A4/ResNet50-W2A4sc.pth
 
   - model_name: MobileNetV2
+    mode: evaluate
     save_name: MobileNetV2-W2A4-sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -32,9 +37,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A4.csv
+    result_path: result_csv/W2A4/evaluate.csv
+    save_path: checkpoints/W2A4/MobileNetV2-W2A4sc.pth
   
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-W2A4-sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -43,9 +50,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A4.csv
+    result_path: result_csv/W2A4/evaluate.csv
+    save_path: checkpoints/W2A4/RegNetX-600MF-W2A4sc.pth
   
   - model_name: RegNetX-3.2GF
+    mode: evaluate
     save_name: RegNetX-3.2GF-W2A4-sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -54,5 +63,6 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A4.csv
+    result_path: result_csv/W2A4/evaluate.csv
+    save_path: checkpoints/W2A4/RegNetX-3.2GF-W2A4sc.pth
     

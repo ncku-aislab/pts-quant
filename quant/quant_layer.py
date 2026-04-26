@@ -378,13 +378,18 @@ class PTSQuantizer(nn.Module):
         self.n_bits = uaq.n_bits
         self.sym = uaq.sym
         self.signed = uaq.signed
-        self.scale = uaq.scale
-        self.log2_scale_floor = None    # The floor of the scale's exponent
-        self.zero_point = uaq.zero_point
         self.n_levels = uaq.n_levels
         self.leaf_param = uaq.leaf_param #Check if quantizer is for weight or activation
         self.is_training = uaq.is_training
         self.prob = uaq.prob
+
+        self.register_buffer("scale", uaq.scale.detach().clone())
+        self.register_buffer("zero_point", uaq.zero_point.detach().clone())
+        # initialize buffer with same shape as scale
+        self.register_buffer(
+            "log2_scale_floor",
+            torch.zeros_like(uaq.scale)
+        )
 
         # Supported options
         assert initialization_fn in ['sigmoid', 'tanh', 'zero', 'random'], \
@@ -548,7 +553,7 @@ class PTSQuantizer(nn.Module):
             else:
                 raise ValueError(f"Unsupported initialization_fn: {self.initialization_fn}")
 
-            self.log2_scale_floor = s_floor
+            self.log2_scale_floor.copy_(s_floor)
 
         elif self.pts_mode == 'normal':
             pass

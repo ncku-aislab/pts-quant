@@ -41,6 +41,8 @@ class ExperimentConfig(TypedDict):
     joint_training: bool
     result_path: NotRequired[str]
     save_path: NotRequired[str]
+    mode: NotRequired[str]        # reconstruct or evaluate
+    weight_path: NotRequired[str] # quantized checkpoint path
 
 def _to_cpu(value):
     if isinstance(value, torch.Tensor):
@@ -175,10 +177,12 @@ def calibrate(config: ExperimentConfig, device=None):
     joint_training = config["joint_training"]
     result_path = config.get("result_path", "result_csv/ImageNet.csv")
     save_path = config.get("save_path", None)
+    mode = config.get("mode", "reconstruct")
+    weight_path = config.get("weight_path", None)
     
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
-    iters_w = 2      #number of iteration for adaround
+    iters_w = 20000      #number of iteration for adaround
     batch_size = 16     #number of batch size
     weight = 0.01       #weight of rounding cost vs the reconstruction loss
 
@@ -198,6 +202,47 @@ def calibrate(config: ExperimentConfig, device=None):
     trainloader, testloader = build_imagenet_data(data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC", batch_size=16)
     trainloader, calibloader = split_data(trainloader, num_samples)
     cali_data, _ = get_train_samples(calibloader, num_samples)
+
+    if mode == "evaluate":
+        if weight_path is None:
+            raise ValueError("weight_path must be provided when mode='evaluate'.")
+
+        if device is None:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        qnn = load_model(
+            model_type="quantized",
+            model_name=model_name,
+            weight_path=weight_path,
+            wq_params=wq_params,
+            aq_params=aq_params,
+        )
+
+        qnn.to(device)
+        qnn.eval()
+
+        print(qnn)
+
+        res = validate_model(testloader, qnn, device)
+        res.update({
+            "model": save_name,
+            "mode": mode,
+            "weight_path": weight_path,
+            "init_fn": initialization_fn,
+            "constraint_fn": constraint_fn,
+            "s_iter": None,
+            "w_bits": wq_params["n_bits"],
+            "a_bits": aq_params["n_bits"],
+            "joint_training": joint_training,
+        })
+
+        df = pd.DataFrame([res])
+        df = save_csv(df, result_path, verbose=False)
+        print(df)
+
+        del qnn, trainloader, testloader
+        torch.cuda.empty_cache()
+        return
 
     #model
     if device is None:
@@ -277,6 +322,7 @@ def calibrate(config: ExperimentConfig, device=None):
         res = validate_model(testloader, qnn, device)
         res.update({
             "model": save_name,
+            "mode": mode,
             "init_fn": initialization_fn,
             "constraint_fn": constraint_fn,
             "s_iter": s_iter,
@@ -289,13 +335,15 @@ def calibrate(config: ExperimentConfig, device=None):
         df = save_csv(df, result_path, verbose=False)
 
         print(df)
-
+        
+        # Save model weights
         save_quantized_checkpoint(
             model=qnn,
             config=config,
             s_iter=s_iter,
             save_path=save_path,
         )
+        
 
 
     

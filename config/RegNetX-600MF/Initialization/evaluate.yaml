@@ -2,6 +2,7 @@ version: 0.1.0
 
 models:
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -10,9 +11,11 @@ models:
     initialization_fn: 'sigmoid'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-sigmoid_sigmoid_s2500.pth
 
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -21,9 +24,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-tanh_sigmoid_s2500.pth
   
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -32,9 +37,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-tanh_tanh_s2500.pth
   
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -43,9 +50,11 @@ models:
     initialization_fn: 'zero'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-zero_sigmoid_s2500.pth
   
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -54,11 +63,12 @@ models:
     initialization_fn: 'random'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
-
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-random_sigmoid_s2500.pth
 
 
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -67,9 +77,11 @@ models:
     initialization_fn: 'sigmoid'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
-  
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-sigmoid_sigmoid_s2500.pth
+
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -78,9 +90,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-tanh_sigmoid_s2500.pth
   
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -89,9 +103,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-tanh_tanh_s2500.pth
   
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -100,9 +116,11 @@ models:
     initialization_fn: 'zero'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-zero_sigmoid_s2500.pth
   
   - model_name: RegNetX-600MF
+    mode: evaluate
     save_name: RegNetX-600MF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -111,4 +129,5 @@ models:
     initialization_fn: 'random'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-600MF.csv
+    result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-random_sigmoid_s2500.pth

@@ -8,6 +8,7 @@ data/
 #result_csv/
 weights_cifar10/
 weights_cifar10
+checkpoints/
 
 ############################
 # Python cache / compiled

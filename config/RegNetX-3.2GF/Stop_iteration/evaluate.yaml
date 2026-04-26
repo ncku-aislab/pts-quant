@@ -2,17 +2,31 @@ version: 0.1.0
 
 models:
   - model_name: RegNetX-3.2GF
+    mode: evaluate
     save_name: RegNetX-3.2GF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
     constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'sigmoid'  #initialization function for the rounding value
-    scale_iter: [2500]
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [0]
     joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i4sc-s0.pth
   - model_name: RegNetX-3.2GF
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i4sc
+    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
+                    'leaf_param': True, 'prob': 0.5}
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [1000]
+    joint_training: True
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i4sc-s1000.pth
+  - model_name: RegNetX-3.2GF
+    mode: evaluate
     save_name: RegNetX-3.2GF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -21,55 +35,47 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-  
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i4sc-s2500.pth
   - model_name: RegNetX-3.2GF
+    mode: evaluate
     save_name: RegNetX-3.2GF-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'tanh'   #constraint function for the rounding value
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
     initialization_fn: 'tanh'  #initialization function for the rounding value
-    scale_iter: [2500]
+    scale_iter: [5000]
     joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-  
-  - model_name: RegNetX-3.2GF
-    save_name: RegNetX-3.2GF-i4sc
-    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'zero'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-  
-  - model_name: RegNetX-3.2GF
-    save_name: RegNetX-3.2GF-i4sc
-    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'random'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-
-
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i4sc-s5000.pth
 
   - model_name: RegNetX-3.2GF
+    mode: evaluate
     save_name: RegNetX-3.2GF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
     constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'sigmoid'  #initialization function for the rounding value
-    scale_iter: [2500]
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [0]
     joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-  
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i2sc-s0.pth
   - model_name: RegNetX-3.2GF
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i2sc
+    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
+                    'leaf_param': True, 'prob': 0.5}
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [1000]
+    joint_training: True
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i2sc-s1000.pth
+  - model_name: RegNetX-3.2GF
+    mode: evaluate
     save_name: RegNetX-3.2GF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
@@ -78,37 +84,17 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-  
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i2sc-s2500.pth
   - model_name: RegNetX-3.2GF
+    mode: evaluate
     save_name: RegNetX-3.2GF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'tanh'   #constraint function for the rounding value
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
     initialization_fn: 'tanh'  #initialization function for the rounding value
-    scale_iter: [2500]
+    scale_iter: [5000]
     joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-  
-  - model_name: RegNetX-3.2GF
-    save_name: RegNetX-3.2GF-i2sc
-    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'zero'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
-  
-  - model_name: RegNetX-3.2GF
-    save_name: RegNetX-3.2GF-i2sc
-    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'random'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
-    result_path: result_csv/RegNetX-3.2GF.csv
+    result_path: result_csv/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i2sc-s5000.pth
