@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -114,17 +115,17 @@ def collect_quantized_weights(model: nn.Module) -> dict:
 
 def resolve_save_path(save_path: str, save_name: str, s_iter: int, num_scale_iters: int) -> str:
     if save_path is None:
-        return None
+        raise ValueError("save_path must be provided when saving a calibrated model.")
+
+    path = Path(save_path)
 
     # If save_path is a directory, save as {save_name}_s{s_iter}.pth
-    if save_path.endswith("/") or os.path.isdir(save_path):
-        return os.path.join(save_path, f"{save_name}_s{s_iter}.pth")
+    if path.is_dir() or str(path).endswith("/"):
+        return str(path / f"{save_name}_s{s_iter}.pth")
 
     # If multiple scale_iter values are used, avoid overwriting the same file
     if num_scale_iters > 1:
-        base, ext = os.path.splitext(save_path)
-        ext = ext if ext else ".pth"
-        return f"{base}_s{s_iter}{ext}"
+        return str(path.with_name(f"{path.stem}_s{s_iter}{path.suffix or '.pth'}"))
 
     return save_path
 
@@ -136,7 +137,7 @@ def save_quantized_checkpoint(
     save_path: str,
 ) -> None:
     if save_path is None:
-        return
+        raise ValueError("save_path must be provided when saving a calibrated model.")
 
     final_save_path = resolve_save_path(
         save_path=save_path,
@@ -145,9 +146,14 @@ def save_quantized_checkpoint(
         num_scale_iters=len(config["scale_iter"]),
     )
 
-    save_dir = os.path.dirname(final_save_path)
-    if save_dir != "":
-        os.makedirs(save_dir, exist_ok=True)
+    Path(final_save_path).parent.mkdir(parents=True, exist_ok=True)
+
+    checkpoint_config = dict(config)
+    checkpoint_config.update({
+        "w_bits": config["wq_params"]["n_bits"],
+        "a_bits": config["aq_params"]["n_bits"],
+        "s_iter": s_iter,
+    })
 
     checkpoint = {
         "model_name": config["model_name"],
@@ -155,7 +161,7 @@ def save_quantized_checkpoint(
         "state_dict": model.state_dict(),
         "quantizer_state": collect_quantizer_state(model),
         "quantized_weights": collect_quantized_weights(model),
-        "config": dict(config),
+        "config": checkpoint_config,
         "s_iter": s_iter,
     }
 
@@ -163,6 +169,115 @@ def save_quantized_checkpoint(
     print(f"Quantized checkpoint saved to {final_save_path}")
 
 
+
+
+
+
+
+def _get_checkpoint_metadata(weight_path: str) -> dict:
+    """Load experiment metadata saved inside a quantized checkpoint.
+
+    New checkpoints saved by save_quantized_checkpoint contain both `config` and
+    `s_iter`. Older checkpoints may only contain a plain state_dict; in that
+    case, return an empty dict so evaluation results do not incorrectly reuse
+    the evaluation YAML settings.
+    """
+    checkpoint = torch.load(weight_path, map_location="cpu")
+
+    if not isinstance(checkpoint, dict):
+        return {}
+
+    config = checkpoint.get("config", {})
+    metadata = dict(config) if isinstance(config, dict) else {}
+
+    if "s_iter" in checkpoint:
+        metadata["s_iter"] = int(checkpoint["s_iter"])
+    if "model_name" in checkpoint:
+        metadata.setdefault("model_name", checkpoint["model_name"])
+    if "save_name" in checkpoint:
+        metadata.setdefault("save_name", checkpoint["save_name"])
+
+    return metadata
+
+
+def _get_config_value(metadata: dict, key: str, default="unknown"):
+    value = metadata.get(key, default)
+    return default if value is None else value
+
+
+def evaluate_checkpoint(config: ExperimentConfig, device=None):
+    """Evaluate an already reconstructed quantized checkpoint.
+
+    This function is intentionally separated from calibrate() because evaluation
+    is a different execution path from calibration/reconstruction.
+    """
+    model_name = config["model_name"]
+    save_name = config["save_name"]
+    wq_params = config["wq_params"]
+    aq_params = config["aq_params"]
+    result_path = config.get("result_path", "result_csv/ImageNet.csv")
+    weight_path = config.get("weight_path", None)
+
+    if weight_path is None:
+        raise ValueError("weight_path must be provided when mode='evaluate'.")
+
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    _, testloader = build_imagenet_data(
+        data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC",
+        batch_size=16,
+    )
+
+    checkpoint_metadata = _get_checkpoint_metadata(weight_path)
+
+    qnn = load_model(
+        model_type="quantized",
+        model_name=model_name,
+        weight_path=weight_path,
+        wq_params=wq_params,
+        aq_params=aq_params,
+    )
+
+    qnn.to(device)
+    qnn.eval()
+
+    print(qnn)
+
+    wq_params_from_ckpt = checkpoint_metadata.get("wq_params", {})
+    aq_params_from_ckpt = checkpoint_metadata.get("aq_params", {})
+    if not isinstance(wq_params_from_ckpt, dict):
+        wq_params_from_ckpt = {}
+    if not isinstance(aq_params_from_ckpt, dict):
+        aq_params_from_ckpt = {}
+
+    res = validate_model(testloader, qnn, device)
+    res.update({
+        "model": _get_config_value(checkpoint_metadata, "save_name", save_name),
+        "mode": "evaluate",
+        "weight_path": weight_path,
+        "init_fn": _get_config_value(checkpoint_metadata, "initialization_fn"),
+        "constraint_fn": _get_config_value(checkpoint_metadata, "constraint_fn"),
+        "s_iter": _get_config_value(checkpoint_metadata, "s_iter"),
+        "w_bits": _get_config_value(
+            checkpoint_metadata,
+            "w_bits",
+            wq_params_from_ckpt.get("n_bits", "unknown"),
+        ),
+        "a_bits": _get_config_value(
+            checkpoint_metadata,
+            "a_bits",
+            aq_params_from_ckpt.get("n_bits", "unknown"),
+        ),
+        "joint_training": _get_config_value(checkpoint_metadata, "joint_training"),
+    })
+
+    df = pd.DataFrame([res])
+    df = save_csv(df, result_path, verbose=False)
+    print(df)
+
+    del qnn, testloader
+    torch.cuda.empty_cache()
 
 
 def calibrate(config: ExperimentConfig, device=None):
@@ -177,8 +292,7 @@ def calibrate(config: ExperimentConfig, device=None):
     joint_training = config["joint_training"]
     result_path = config.get("result_path", "result_csv/ImageNet.csv")
     save_path = config.get("save_path", None)
-    mode = config.get("mode", "reconstruct")
-    weight_path = config.get("weight_path", None)
+    mode = config.get("mode", "reconstruction")
     
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
@@ -197,52 +311,13 @@ def calibrate(config: ExperimentConfig, device=None):
     bn_lr = 1e-3        #learning rate for DC
     lamb_c = 0.02       #hyper-parameter for DC
 
+    if mode not in ["reconstruction", "calibrate"]:
+        raise ValueError(f"Unsupported mode for calibrate(): {mode}")
+
     # Dataset
-    #trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
     trainloader, testloader = build_imagenet_data(data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC", batch_size=16)
     trainloader, calibloader = split_data(trainloader, num_samples)
     cali_data, _ = get_train_samples(calibloader, num_samples)
-
-    if mode == "evaluate":
-        if weight_path is None:
-            raise ValueError("weight_path must be provided when mode='evaluate'.")
-
-        if device is None:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-
-        qnn = load_model(
-            model_type="quantized",
-            model_name=model_name,
-            weight_path=weight_path,
-            wq_params=wq_params,
-            aq_params=aq_params,
-        )
-
-        qnn.to(device)
-        qnn.eval()
-
-        print(qnn)
-
-        res = validate_model(testloader, qnn, device)
-        res.update({
-            "model": save_name,
-            "mode": mode,
-            "weight_path": weight_path,
-            "init_fn": initialization_fn,
-            "constraint_fn": constraint_fn,
-            "s_iter": None,
-            "w_bits": wq_params["n_bits"],
-            "a_bits": aq_params["n_bits"],
-            "joint_training": joint_training,
-        })
-
-        df = pd.DataFrame([res])
-        df = save_csv(df, result_path, verbose=False)
-        print(df)
-
-        del qnn, trainloader, testloader
-        torch.cuda.empty_cache()
-        return
 
     #model
     if device is None:
@@ -355,6 +430,19 @@ def calibrate(config: ExperimentConfig, device=None):
     gc.collect()
     
 
+
+
+def run_experiment(config: ExperimentConfig, device=None):
+    mode = config.get("mode", "reconstruction")
+
+    if mode == "evaluate":
+        return evaluate_checkpoint(config, device=device)
+    if mode in ["reconstruction", "calibrate"]:
+        return calibrate(config, device=device)
+
+    raise ValueError(f"Unsupported mode: {mode}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PTQ calibration script")
 
@@ -372,4 +460,4 @@ if __name__ == "__main__":
 
     # run calibration
     for model_config in args.models:
-        calibrate(model_config)
+        run_experiment(model_config)

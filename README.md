@@ -92,9 +92,10 @@ PTS-Quant
 │   └── MobileNetV2.py
 │
 ├── configs/
-│   └── quant.yaml
 │
 ├── utils/
+│
+├── result_csv/
 │
 ├── docker/
 │   ├── build.sh
@@ -155,23 +156,45 @@ data/
 
 ## Running Experiments
 
+This project supports two modes:
+
+- reconstruction: perform PTQ calibration and save quantized checkpoints
+- evaluate: load a saved checkpoint and evaluate its performance
+
+### Reconstruction Example
 Example: quantizing **ResNet-18**
-Set the configuration in `config/quant.yaml`:
+Set the configuration in `config/`:
 ```
 version: 0.1.0
 
 models:
   - model_name: ResNet18
+    mode: reconstruction
     save_name: ResNet18-i4sc
-    wq_params: {'n_bits': 4, symmetric: True, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: True, 'channel_wise': False, 'scale_method': 'mse',
+    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
     constraint_fn: 'sigmoid'   #constraint function for the rounding value
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/ImageNet.csv
+    result_path: result_csv/ResNet18/initialization/reconstruct.csv
+    save_path: checkpoints/ResNet18/initialization/ResNet18-i4sc-tanh_sigmoid_s2500.pth
 ```
+### Evaluate Example
+To evaluate a saved checkpoint:
+```
+  - model_name: ResNet18
+    mode: evaluate
+    save_name: ResNet18-i4sc
+    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
+                    'leaf_param': True, 'prob': 0.5}
+
+    result_path: result_csv/ResNet18/joint_training/evaluate.csv
+    weight_path: checkpoints/ResNet18/joint_training/ResNet18-i4sc-joint_false_s2500.pth
+```
+
 ### Model
 The following models are supported:
 - ResNet18
@@ -233,9 +256,17 @@ Specifies the file path for saving experiment results.
 - If not provided, the default path is `result_csv/ImageNet.csv`.
 - The parent directory will be automatically created if it does not exist.
 
+### Save Path
+Specifies where to save quantized checkpoints (reconstruction mode only).
+
+- If a directory is provided, checkpoints will be saved as:
+`{save_name}_s{scale_iter}.pth`
+
+- If multiple `scale_iter` values are used, filenames are automatically adjusted to avoid overwriting.
+
 ### Example Usage
 After editing the configuration file, run:
-`python quant/ptq.py --config config/quant.yaml`
+`python quant/ptq.py --config config/ResNet18/Initialization/Initialization.yaml`
 
 ## Experimental Results
 
@@ -250,6 +281,7 @@ Results show that PTS-Quant consistently improves accuracy over PD-Quant under P
 | Method | Scheme | W/A | Top-1 | Δ |
 |--------|--------|-----|------|----|
 | HAWQv3 | QAT | 4/4 | 68.45 | -3.02 |
+| RAPQ | PTQ | 4/4 | 69.28 | -1.80 |
 | PD-Quant (PoT) | PTQ | 4/4 | 68.70 | -2.31 |
 | **PTS-Quant** | PTQ | 4/4 | **68.77** | **-2.24** |
 
@@ -260,6 +292,7 @@ Results show that PTS-Quant consistently improves accuracy over PD-Quant under P
 | TQT | QAT | 4/8 | 74.40 | -0.80 |
 | HMQ | QAT | 3.55/8 | 76.30 | +0.15 |
 | HAWQv3 | QAT | 4/4 | 74.24 | -3.48 |
+| RAPQ | PTQ | 4/4 | 74.64 | -2.36 |
 | PD-Quant (PoT) | PTQ | 4/4 | 74.03 | -2.60 |
 | **PTS-Quant** | PTQ | 4/4 | **74.59** | **-2.04** |
 
@@ -268,6 +301,7 @@ Results show that PTS-Quant consistently improves accuracy over PD-Quant under P
 | Method | Scheme | W/A | Top-1 | Δ |
 |--------|--------|-----|------|----|
 | HMQ | QAT | 4.16/8 | 71.40 | -0.48 |
+| RAPQ | PTQ | 4/4 | 64.48 | -8.01 |
 | PD-Quant (PoT) | PTQ | 4/4 | 65.57 | -7.05 |
 | **PTS-Quant** | PTQ | 4/4 | **65.63** | **-6.99** |
 
@@ -275,6 +309,7 @@ Results show that PTS-Quant consistently improves accuracy over PD-Quant under P
 
 | Method | Scheme | W/A | Top-1 | Δ |
 |--------|--------|-----|------|----|
+| RAPQ | PTQ | 4/4 | 69.59 | -4.12 |
 | PD-Quant (PoT) | PTQ | 4/4 | 69.33 | -4.19 |
 | **PTS-Quant** | PTQ | 4/4 | **69.68** | **-3.84** |
 
@@ -282,6 +317,7 @@ Results show that PTS-Quant consistently improves accuracy over PD-Quant under P
 
 | Method | Scheme | W/A | Top-1 | Δ |
 |--------|--------|-----|------|----|
+| RAPQ | PTQ | 4/4 | 74.25 | -4.11 |
 | PD-Quant (PoT) | PTQ | 4/4 | 75.24 | -3.22 |
 | **PTS-Quant** | PTQ | 4/4 | **76.12** | **-2.34** |
 
@@ -323,6 +359,44 @@ Results show that PTS-Quant consistently improves accuracy over PD-Quant under P
 |--------|--------|-----|------|----|
 | PD-Quant (PoT) | PTQ | 2/2 | 42.00 | -36.46 |
 | **PTS-Quant** | PTQ | 2/2 | **49.17** | **-29.29** |
+
+
+### W2A4 Quantization(W2A4)
+
+#### ResNet18
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| RAPQ | PTQ | 2/4 | 65.32 | -5.76 |
+| **PTS-Quant** | PTQ | 2/4 | 64.13 | -6.88 |
+
+#### ResNet50
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| RAPQ | PTQ | 2/4 | 69.71 | -7.29 |
+| **PTS-Quant** | PTQ | 2/4 | 69.12 | -7.51 |
+
+#### MobileNetV2
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| RAPQ | PTQ | 2/4 | 48.12 | -24.37 |
+| **PTS-Quant** | PTQ | 2/4 | 44.32 | -28.30 |
+
+#### RegNetX-600MF
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| RAPQ | PTQ | 2/4 | 61.48 | -12.23 |
+| **PTS-Quant** | PTQ | 2/4 | 61.91 | -11.61 |
+
+#### RegNetX-3.2GF
+
+| Method | Scheme | W/A | Top-1 | Δ |
+|--------|--------|-----|------|----|
+| RAPQ | PTQ | 2/4 | 69.49 | -8.87 |
+| **PTS-Quant** | PTQ | 2/4 | 71.15 | -7.31 |
 
 Δ denotes the accuracy drop compared to the corresponding full-precision model.
 

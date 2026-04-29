@@ -53,16 +53,6 @@ def _build_fp_model(model_name: str, pretrained: bool = True, **kwargs):
     return model
 
 
-def _get_submodule(model: nn.Module, module_name: str):
-    module = model
-    if module_name == "":
-        return module
-
-    for attr in module_name.split("."):
-        module = getattr(module, attr)
-    return module
-
-
 def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: dict = None):
     if quantizer_state is None:
         quantizer_state = {}

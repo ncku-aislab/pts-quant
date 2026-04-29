@@ -7,10 +7,7 @@ models:
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'tanh'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
+
     result_path: result_csv/W2A4/evaluate.csv
     weight_path: checkpoints/W2A4/ResNet18-W2A4sc.pth
   
@@ -20,10 +17,7 @@ models:
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'tanh'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
+
     result_path: result_csv/W2A4/evaluate.csv
     save_path: checkpoints/W2A4/ResNet50-W2A4sc.pth
 
@@ -33,10 +27,7 @@ models:
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'tanh'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
+
     result_path: result_csv/W2A4/evaluate.csv
     save_path: checkpoints/W2A4/MobileNetV2-W2A4sc.pth
   
@@ -46,10 +37,7 @@ models:
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'tanh'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
+
     result_path: result_csv/W2A4/evaluate.csv
     save_path: checkpoints/W2A4/RegNetX-600MF-W2A4sc.pth
   
@@ -59,10 +47,7 @@ models:
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
-    constraint_fn: 'sigmoid'   #constraint function for the rounding value
-    initialization_fn: 'tanh'  #initialization function for the rounding value
-    scale_iter: [2500]
-    joint_training: True
+
     result_path: result_csv/W2A4/evaluate.csv
     save_path: checkpoints/W2A4/RegNetX-3.2GF-W2A4sc.pth
     
