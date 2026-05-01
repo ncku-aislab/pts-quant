@@ -101,18 +101,16 @@ def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: dict = None)
 
 def _load_quantized_model(
     model_name: str,
-    weight_path: str,
+    checkpoint: str,
     wq_params: dict,
     aq_params: dict,
     map_location="cpu",
     **kwargs,
 ):
-    if weight_path is None:
+    if checkpoint is None:
         raise ValueError("weight_path must be provided when loading a quantized model.")
     if wq_params is None or aq_params is None:
         raise ValueError("wq_params and aq_params must be provided when loading a quantized model.")
-
-    checkpoint = torch.load(weight_path, map_location=map_location)
 
     base_model = _build_fp_model(model_name, pretrained=False, **kwargs)
     model = QuantModel(
@@ -133,7 +131,7 @@ def _load_quantized_model(
     model.set_quant_state(weight_quant=True, act_quant=True)
     model.eval()
 
-    print(f"Loaded quantized model from {weight_path}")
+    print(f"Loaded quantized model from checkpoint")
     if missing_keys:
         print(f"Missing keys: {missing_keys}")
     if unexpected_keys:
@@ -165,7 +163,7 @@ def _load_quantized_model(
 def load_model(
     model_type: str,
     model_name: str,
-    weight_path: str = None,
+    checkpoint: dict = None,
     wq_params=None,
     aq_params=None,
     pretrained: bool = True,
@@ -177,7 +175,7 @@ def load_model(
     elif model_type in ["quant", "quantized"]:
         return _load_quantized_model(
             model_name=model_name,
-            weight_path=weight_path,
+            checkpoint=checkpoint,
             wq_params=wq_params,
             aq_params=aq_params,
             **kwargs,

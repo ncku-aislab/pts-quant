@@ -4,50 +4,30 @@ models:
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i4sc
-    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-sigmoid_sigmoid_s2500.pth
 
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i4sc
-    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-tanh_sigmoid_s2500.pth
   
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i4sc
-    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-tanh_tanh_s2500.pth
   
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i4sc
-    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-zero_sigmoid_s2500.pth
   
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i4sc
-    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-random_sigmoid_s2500.pth
 
@@ -55,49 +35,29 @@ models:
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i2sc
-    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-sigmoid_sigmoid_s2500.pth
 
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i2sc
-    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-tanh_sigmoid_s2500.pth
   
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i2sc
-    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-tanh_tanh_s2500.pth
   
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i2sc
-    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-zero_sigmoid_s2500.pth
   
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i2sc
-    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 2, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/RegNetX-600MF/initialization/evaluate.csv
     weight_path: checkpoints/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-random_sigmoid_s2500.pth

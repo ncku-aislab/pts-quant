@@ -113,21 +113,21 @@ def collect_quantized_weights(model: nn.Module) -> dict:
     return quantized_weights
 
 
-def resolve_save_path(save_path: str, save_name: str, s_iter: int, num_scale_iters: int) -> str:
+def resolve_save_path(save_path: str, save_name: str, s_iter: int, num_scale_iters: int) -> Path:
     if save_path is None:
         raise ValueError("save_path must be provided when saving a calibrated model.")
 
     path = Path(save_path)
 
     # If save_path is a directory, save as {save_name}_s{s_iter}.pth
-    if path.is_dir() or str(path).endswith("/"):
-        return str(path / f"{save_name}_s{s_iter}.pth")
+    if path.is_dir():
+        return path / f"{save_name}_s{s_iter}.pth"
 
     # If multiple scale_iter values are used, avoid overwriting the same file
     if num_scale_iters > 1:
-        return str(path.with_name(f"{path.stem}_s{s_iter}{path.suffix or '.pth'}"))
+        return path.with_name(f"{path.stem}_s{s_iter}{path.suffix or '.pth'}")
 
-    return save_path
+    return path
 
 
 def save_quantized_checkpoint(
@@ -174,7 +174,7 @@ def save_quantized_checkpoint(
 
 
 
-def _get_checkpoint_metadata(weight_path: str) -> dict:
+def _get_checkpoint_metadata(checkpoint) -> dict:
     """Load experiment metadata saved inside a quantized checkpoint.
 
     New checkpoints saved by save_quantized_checkpoint contain both `config` and
@@ -182,13 +182,12 @@ def _get_checkpoint_metadata(weight_path: str) -> dict:
     case, return an empty dict so evaluation results do not incorrectly reuse
     the evaluation YAML settings.
     """
-    checkpoint = torch.load(weight_path, map_location="cpu")
 
     if not isinstance(checkpoint, dict):
         return {}
 
     config = checkpoint.get("config", {})
-    metadata = dict(config) if isinstance(config, dict) else {}
+    metadata = config.copy() if isinstance(config, dict) else {}
 
     if "s_iter" in checkpoint:
         metadata["s_iter"] = int(checkpoint["s_iter"])
@@ -213,8 +212,6 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
     """
     model_name = config["model_name"]
     save_name = config["save_name"]
-    wq_params = config["wq_params"]
-    aq_params = config["aq_params"]
     result_path = config.get("result_path", "result_csv/ImageNet.csv")
     weight_path = config.get("weight_path", None)
 
@@ -229,12 +226,17 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
         batch_size=16,
     )
 
-    checkpoint_metadata = _get_checkpoint_metadata(weight_path)
+    checkpoint = torch.load(weight_path, map_location="cpu")
+
+    checkpoint_metadata = _get_checkpoint_metadata(checkpoint)
+
+    wq_params = checkpoint_metadata.get("wq_params")
+    aq_params = checkpoint_metadata.get("aq_params")
 
     qnn = load_model(
         model_type="quantized",
         model_name=model_name,
-        weight_path=weight_path,
+        checkpoint=checkpoint,
         wq_params=wq_params,
         aq_params=aq_params,
     )
