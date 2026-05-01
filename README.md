@@ -187,10 +187,6 @@ To evaluate a saved checkpoint:
   - model_name: ResNet18
     mode: evaluate
     save_name: ResNet18-i4sc
-    wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
-    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
-                    'leaf_param': True, 'prob': 0.5}
-
     result_path: result_csv/ResNet18/joint_training/evaluate.csv
     weight_path: checkpoints/ResNet18/joint_training/ResNet18-i4sc-joint_false_s2500.pth
 ```
