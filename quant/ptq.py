@@ -204,8 +204,6 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
 
         if "s_iter" in checkpoint:
             metadata["s_iter"] = int(checkpoint["s_iter"])
-        if "model_name" in checkpoint:
-            metadata.setdefault("model_name", checkpoint["model_name"])
         if "save_name" in checkpoint:
             metadata.setdefault("save_name", checkpoint["save_name"])
     else:

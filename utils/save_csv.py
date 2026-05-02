@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 
-def save_csv(df: pd.DataFrame, filename: str, verbose: bool = True, existed: str = 'append') -> None:
+def save_csv(df: pd.DataFrame, filename: str, verbose: bool = True, existed: str = 'append') -> pd.DataFrame:
     if existed == 'overwrite':
         pass
     elif existed == 'append':

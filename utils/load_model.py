@@ -104,7 +104,6 @@ def _load_quantized_model(
     checkpoint: str,
     wq_params: dict,
     aq_params: dict,
-    map_location="cpu",
     **kwargs,
 ):
     if checkpoint is None:
@@ -163,7 +162,7 @@ def _load_quantized_model(
 def load_model(
     model_type: str,
     model_name: str,
-    checkpoint: dict = None,
+    checkpoint: dict,
     wq_params=None,
     aq_params=None,
     pretrained: bool = True,
