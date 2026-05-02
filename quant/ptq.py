@@ -169,36 +169,6 @@ def save_quantized_checkpoint(
     print(f"Quantized checkpoint saved to {final_save_path}")
 
 
-
-
-
-
-
-def _get_checkpoint_metadata(checkpoint) -> dict:
-    """Load experiment metadata saved inside a quantized checkpoint.
-
-    New checkpoints saved by save_quantized_checkpoint contain both `config` and
-    `s_iter`. Older checkpoints may only contain a plain state_dict; in that
-    case, return an empty dict so evaluation results do not incorrectly reuse
-    the evaluation YAML settings.
-    """
-
-    if not isinstance(checkpoint, dict):
-        return {}
-
-    config = checkpoint.get("config", {})
-    metadata = config.copy() if isinstance(config, dict) else {}
-
-    if "s_iter" in checkpoint:
-        metadata["s_iter"] = int(checkpoint["s_iter"])
-    if "model_name" in checkpoint:
-        metadata.setdefault("model_name", checkpoint["model_name"])
-    if "save_name" in checkpoint:
-        metadata.setdefault("save_name", checkpoint["save_name"])
-
-    return metadata
-
-
 def _get_config_value(metadata: dict, key: str, default="unknown"):
     value = metadata.get(key, default)
     return default if value is None else value
@@ -214,6 +184,7 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
     save_name = config["save_name"]
     result_path = config.get("result_path", "result_csv/ImageNet.csv")
     weight_path = config.get("weight_path", None)
+    test_batch_size = config.get("test_batch_size", 16)
 
     if weight_path is None:
         raise ValueError("weight_path must be provided when mode='evaluate'.")
@@ -223,15 +194,25 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
 
     _, testloader = build_imagenet_data(
         data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC",
-        batch_size=16,
+        batch_size=test_batch_size,
     )
 
     checkpoint = torch.load(weight_path, map_location="cpu")
 
-    checkpoint_metadata = _get_checkpoint_metadata(checkpoint)
+    if isinstance(checkpoint, dict):
+        metadata = checkpoint.get("config", {})
 
-    wq_params = checkpoint_metadata.get("wq_params")
-    aq_params = checkpoint_metadata.get("aq_params")
+        if "s_iter" in checkpoint:
+            metadata["s_iter"] = int(checkpoint["s_iter"])
+        if "model_name" in checkpoint:
+            metadata.setdefault("model_name", checkpoint["model_name"])
+        if "save_name" in checkpoint:
+            metadata.setdefault("save_name", checkpoint["save_name"])
+    else:
+        metadata = {}
+
+    wq_params = metadata.get("wq_params")
+    aq_params = metadata.get("aq_params")
 
     qnn = load_model(
         model_type="quantized",
@@ -246,32 +227,30 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
 
     print(qnn)
 
-    wq_params_from_ckpt = checkpoint_metadata.get("wq_params", {})
-    aq_params_from_ckpt = checkpoint_metadata.get("aq_params", {})
-    if not isinstance(wq_params_from_ckpt, dict):
-        wq_params_from_ckpt = {}
-    if not isinstance(aq_params_from_ckpt, dict):
-        aq_params_from_ckpt = {}
+    if not isinstance(wq_params, dict):
+        wq_params = {}
+    if not isinstance(aq_params, dict):
+        aq_params = {}
 
     res = validate_model(testloader, qnn, device)
     res.update({
-        "model": _get_config_value(checkpoint_metadata, "save_name", save_name),
+        "model": _get_config_value(metadata, "save_name", save_name),
         "mode": "evaluate",
         "weight_path": weight_path,
-        "init_fn": _get_config_value(checkpoint_metadata, "initialization_fn"),
-        "constraint_fn": _get_config_value(checkpoint_metadata, "constraint_fn"),
-        "s_iter": _get_config_value(checkpoint_metadata, "s_iter"),
+        "init_fn": _get_config_value(metadata, "initialization_fn"),
+        "constraint_fn": _get_config_value(metadata, "constraint_fn"),
+        "s_iter": _get_config_value(metadata, "s_iter"),
         "w_bits": _get_config_value(
-            checkpoint_metadata,
+            metadata,
             "w_bits",
-            wq_params_from_ckpt.get("n_bits", "unknown"),
+            wq_params.get("n_bits", "unknown"),
         ),
         "a_bits": _get_config_value(
-            checkpoint_metadata,
+            metadata,
             "a_bits",
-            aq_params_from_ckpt.get("n_bits", "unknown"),
+            aq_params.get("n_bits", "unknown"),
         ),
-        "joint_training": _get_config_value(checkpoint_metadata, "joint_training"),
+        "joint_training": _get_config_value(metadata, "joint_training"),
     })
 
     df = pd.DataFrame([res])
@@ -295,6 +274,7 @@ def calibrate(config: ExperimentConfig, device=None):
     result_path = config.get("result_path", "result_csv/ImageNet.csv")
     save_path = config.get("save_path", None)
     mode = config.get("mode", "reconstruction")
+    
     
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
