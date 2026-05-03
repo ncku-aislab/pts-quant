@@ -193,7 +193,7 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
     _, testloader = build_imagenet_data(
-        data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC",
+        data_path = "data/ILSVRC2012",
         batch_size=test_batch_size,
     )
 
