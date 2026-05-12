@@ -206,7 +206,6 @@ version: 0.1.0
 
 models:
   - model_name: ResNet18
-    mode: reconstruction
     dataset: imagenet
     mode: reconstruction
     save_name: ResNet18-i4sc
@@ -217,8 +216,8 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
-    result_path: result_csv/ResNet18/initialization/reconstruct.csv
-    save_path: checkpoints/ResNet18/initialization/ResNet18-i4sc-tanh_sigmoid_s2500.pth
+    result_path: result_csv/imagenet/ResNet18/stop_iteration/reconstruct.csv
+    save_path: checkpoints/imagenet/ResNet18/stop_iteration/
 ```
 ### Evaluate Example
 
@@ -344,10 +343,13 @@ Specifies the file path for saving experiment results.
 - The parent directory will be automatically created if it does not exist.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< Updated upstream
 =======
 >>>>>>> 06b2349 (Add cifar10 settings, experimental results, and update README.md(fix #11))
+=======
+>>>>>>> 72483a5 (Delete merge conflict (fix #11))
 ### Save Path
 Specifies where to save quantized checkpoints (reconstruction mode only).
 
@@ -373,8 +375,11 @@ The weight path you want to load your quantized checkpoints (evaluate mode only)
 
 - Type: `str`
 
+<<<<<<< HEAD
 >>>>>>> Stashed changes
 >>>>>>> 06b2349 (Add cifar10 settings, experimental results, and update README.md(fix #11))
+=======
+>>>>>>> 72483a5 (Delete merge conflict (fix #11))
 ### Example Usage
 After editing the configuration file, calibration can run:
 `python quant/ptq.py --config config/W2A4/W2A4.yaml`

@@ -308,7 +308,6 @@ def calibrate(config: ExperimentConfig, device=None):
         trainloader, testloader = load_cifar10()
         trainloader, calibloader = split_data(trainloader, num_samples)
         cali_data, _ = split_data_label(calibloader)
-
     #model
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
