@@ -2,6 +2,7 @@ version: 0.1.0
 
 models:
   - model_name: ResNet18
+    dataset: imagenet
     mode: reconstruction
     save_name: ResNet18-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
@@ -11,10 +12,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A2/reconstruct.csv
+    result_path: result_csv/imagenet/W2A2/reconstruct.csv
     save_path: checkpoints/imagenet/ResNet18/ResNet18-i2sc.pth
   
   - model_name: ResNet50
+    dataset: imagenet
     mode: reconstruction
     save_name: ResNet50-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
@@ -24,10 +26,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A2/reconstruct.csv
+    result_path: result_csv/imagenet/W2A2/reconstruct.csv
     save_path: checkpoints/imagenet/ResNet50/ResNet50-i2sc.pth
 
   - model_name: MobileNetV2
+    dataset: imagenet
     mode: reconstruction
     save_name: MobileNetV2-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
@@ -37,10 +40,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A2/reconstruct.csv
+    result_path: result_csv/imagenet/W2A2/reconstruct.csv
     save_path: checkpoints/imagenet/MobileNetV2/MobileNetV2-i2sc.pth
   
   - model_name: RegNetX-600MF
+    dataset: imagenet
     mode: reconstruction
     save_name: RegNetX-600MF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
@@ -50,10 +54,11 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A2/reconstruct.csv
+    result_path: result_csv/imagenet/W2A2/reconstruct.csv
     save_path: checkpoints/imagenet/RegNetX-600MF/RegNetX-600MF-i2sc.pth
   
   - model_name: RegNetX-3.2GF
+    dataset: imagenet
     mode: reconstruction
     save_name: RegNetX-3.2GF-i2sc
     wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
@@ -63,6 +68,6 @@ models:
     initialization_fn: 'tanh'  #initialization function for the rounding value
     scale_iter: [2500]
     joint_training: True
-    result_path: result_csv/W2A2/reconstruct.csv
+    result_path: result_csv/imagenet/W2A2/reconstruct.csv
     save_path: checkpoints/imagenet/RegNetX-3.2GF/RegNetX-3.2GF-i2sc.pth
     

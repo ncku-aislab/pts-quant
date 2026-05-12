@@ -161,7 +161,7 @@ def layer_reconstruction(model: QuantModel, fp_model: QuantModel, layer: QuantMo
         output = out_quant
         for num, module in enumerate(module_list):
             # for ResNet and RegNet
-            if name_list[num] == 'fc':
+            if name_list[num] == 'fc' or name_list[num] == 'linear':
                 output = torch.flatten(output, 1)
             # for MobileNet and MNasNet
             if isinstance(module, torch.nn.Dropout):

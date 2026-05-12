@@ -110,11 +110,11 @@ class BottleneckTransform(nn.Module):
         return x
 
 
-class ResBottleneckBlock(nn.Module):
+class ResBottleneckBlock_imagenet(nn.Module):
     """Residual bottleneck block: x + F(x), F = bottleneck transform"""
 
     def __init__(self, w_in, w_out, stride, bm=1.0, gw=1, se_r=None):
-        super(ResBottleneckBlock, self).__init__()
+        super(ResBottleneckBlock_imagenet, self).__init__()
         self._construct(w_in, w_out, stride, bm, gw, se_r)
 
     def _add_skip_proj(self, w_in, w_out, stride):
@@ -218,7 +218,7 @@ class AnyNet(nn.Module):
         # Construct the stem
         self.stem = SimpleStemIN(3, stem_w)
         # Construct the stages
-        block_fun = ResBottleneckBlock
+        block_fun = ResBottleneckBlock_imagenet
         prev_w = stem_w
         for i, (d, w, s, bm, gw) in enumerate(stage_params):
             self.add_module(
@@ -327,45 +327,12 @@ class RegNet(AnyNet):
         super(RegNet, self).__init__(**kwargs)
 
 
-def regnetx_200m(**kwargs):
-    """
-    Constructs a RegNet-X model under 200M FLOPs.
-    """
-    model = RegNet(regnetX_200M_config, **kwargs)
-    return model
-
-
-def regnetx_400m(**kwargs):
-    """
-    Constructs a RegNet-X model under 400M FLOPs.
-    """
-    model = RegNet(regnetX_400M_config, **kwargs)
-    return model
-
-
 def regnetx_600m(**kwargs):
     """
     Constructs a RegNet-X model under 600M FLOPs.
     """
     model = RegNet(regnetX_600M_config, **kwargs)
     return model
-
-
-def regnetx_800m(**kwargs):
-    """
-    Constructs a RegNet-X model under 800M FLOPs.
-    """
-    model = RegNet(regnetX_800M_config, **kwargs)
-    return model
-
-
-def regnetx_1600m(**kwargs):
-    """
-    Constructs a RegNet-X model under 1600M FLOPs.
-    """
-    model = RegNet(regnetX_1600M_config, **kwargs)
-    return model
-
 
 def regnetx_3200m(**kwargs):
     """
@@ -374,83 +341,4 @@ def regnetx_3200m(**kwargs):
     model = RegNet(regnetX_3200M_config, **kwargs)
     return model
 
-
-def regnetx_4000m(**kwargs):
-    """
-    Constructs a RegNet-X model under 4000M FLOPs.
-    """
-    model = RegNet(regnetX_4000M_config, **kwargs)
-    return model
-
-
-def regnetx_6400m(**kwargs):
-    """
-    Constructs a RegNet-X model under 6400M FLOPs.
-    """
-    model = RegNet(regnetX_6400M_config, **kwargs)
-    return model
-
-
-def regnety_200m(**kwargs):
-    """
-    Constructs a RegNet-Y model under 200M FLOPs.
-    """
-    model = RegNet(regnetY_200M_config, **kwargs)
-    return model
-
-
-def regnety_400m(**kwargs):
-    """
-    Constructs a RegNet-Y model under 400M FLOPs.
-    """
-    model = RegNet(regnetY_400M_config, **kwargs)
-    return model
-
-
-def regnety_600m(**kwargs):
-    """
-    Constructs a RegNet-Y model under 600M FLOPs.
-    """
-    model = RegNet(regnetY_600M_config, **kwargs)
-    return model
-
-
-def regnety_800m(**kwargs):
-    """
-    Constructs a RegNet-Y model under 800M FLOPs.
-    """
-    model = RegNet(regnetY_800M_config, **kwargs)
-    return model
-
-
-def regnety_1600m(**kwargs):
-    """
-    Constructs a RegNet-Y model under 1600M FLOPs.
-    """
-    model = RegNet(regnetY_1600M_config, **kwargs)
-    return model
-
-
-def regnety_3200m(**kwargs):
-    """
-    Constructs a RegNet-Y model under 3200M FLOPs.
-    """
-    model = RegNet(regnetY_3200M_config, **kwargs)
-    return model
-
-
-def regnety_4000m(**kwargs):
-    """
-    Constructs a RegNet-Y model under 4000M FLOPs.
-    """
-    model = RegNet(regnetY_4000M_config, **kwargs)
-    return model
-
-
-def regnety_6400m(**kwargs):
-    """
-    Constructs a RegNet-Y model under 6400M FLOPs.
-    """
-    model = RegNet(regnetY_6400M_config, **kwargs)
-    return model
 

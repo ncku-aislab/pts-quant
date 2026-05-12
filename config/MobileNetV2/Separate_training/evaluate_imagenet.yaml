@@ -1,0 +1,16 @@
+version: 0.1.0
+
+models:
+  - model_name: MobileNetV2
+    dataset: imagenet
+    mode: evaluate
+    save_name: MobileNetV2-i4sc
+    result_path: result_csv/imagenet/MobileNetV2/joint_training/evaluate.csv
+    weight_path: checkpoints/imagenet/MobileNetV2/joint_training/MobileNetV2-i4sc-joint_false_s2500.pth
+
+  - model_name: MobileNetV2
+    dataset: imagenet
+    mode: evaluate
+    save_name: MobileNetV2-i2sc
+    result_path: result_csv/imagenet/MobileNetV2/joint_training/evaluate.csv
+    weight_path: checkpoints/imagenet/MobileNetV2/joint_training/MobileNetV2-i2sc-joint_false_s2500.pth

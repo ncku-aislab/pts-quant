@@ -1,0 +1,6 @@
+,Acc@1,Acc@5,model,mode,weight_path,init_fn,constraint_fn,s_iter,w_bits,a_bits,joint_training
+0,94.84,99.83,ResNet18-i4sc,evaluate,checkpoints/cifar10/ResNet18/ResNet18-i4sc.pth,tanh,sigmoid,2500,4,4,True
+0,95.26,99.87,ResNet50-i4sc,evaluate,checkpoints/cifar10//ResNet50/ResNet50-i4sc.pth,tanh,sigmoid,2500,4,4,True
+0,91.12,99.65,MobileNetV2-i4sc,evaluate,checkpoints/cifar10/MobileNetV2/MobileNetV2-i4sc.pth,tanh,sigmoid,2500,4,4,True
+0,94.18,99.88,RegNetX-200MF-i4sc,evaluate,checkpoints/cifar10/RegNetX-200MF/RegNetX-200MF-i4sc.pth,tanh,sigmoid,2500,4,4,True
+0,94.19,99.83,RegNetX-400MF-i4sc,evaluate,checkpoints/cifar10/RegNetX-400MF/RegNetX-400MF-i4sc.pth,tanh,sigmoid,2500,4,4,True

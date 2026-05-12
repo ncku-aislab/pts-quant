@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
+__all__ = ['ResNet', 'resnet18', 'resnet50', 'resnet101',
            'resnet152', 'resnext50_32x4d', 'resnext101_32x8d', 'wide_resnet50_2', 'wide_resnet101_2']
 
 
@@ -19,21 +19,21 @@ def conv1x1(in_planes, out_planes, stride=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
-class BasicBlock(nn.Module):
+class BasicBlock_imagenet(nn.Module):
     expansion = 1
     __constants__ = ['downsample']
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
                  base_width=64, dilation=1, norm_layer=None):
-        super(BasicBlock, self).__init__()
+        super(BasicBlock_imagenet, self).__init__()
         if norm_layer is None:
             norm_layer = BN
         if groups != 1 or base_width != 64:
             raise ValueError(
-                'BasicBlock only supports groups=1 and base_width=64')
+                'BasicBlock_imagenet only supports groups=1 and base_width=64')
         if dilation > 1:
             raise NotImplementedError(
-                "Dilation > 1 not supported in BasicBlock")
+                "Dilation > 1 not supported in BasicBlock_imagenet")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = norm_layer(planes)
@@ -63,13 +63,13 @@ class BasicBlock(nn.Module):
         return out
 
 
-class Bottleneck(nn.Module):
+class Bottleneck_imagenet(nn.Module):
     expansion = 4
     __constants__ = ['downsample']
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
                  base_width=64, dilation=1, norm_layer=None):
-        super(Bottleneck, self).__init__()
+        super(Bottleneck_imagenet, self).__init__()
         if norm_layer is None:
             norm_layer = BN
         width = int(planes * (base_width / 64.)) * groups
@@ -189,9 +189,9 @@ class ResNet(nn.Module):
         # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
         if zero_init_residual:
             for m in self.modules():
-                if isinstance(m, Bottleneck):
+                if isinstance(m, Bottleneck_imagenet):
                     nn.init.constant_(m.bn3.weight, 0)
-                elif isinstance(m, BasicBlock):
+                elif isinstance(m, BasicBlock_imagenet):
                     nn.init.constant_(m.bn2.weight, 0)
 
     def _make_layer(self, block, planes, blocks, stride=1, dilate=False):
@@ -247,52 +247,13 @@ class ResNet(nn.Module):
         return self._forward_impl(x)
 
 
-def resnet18(**kwargs):
-    model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
+def resnet18_imagenet(**kwargs):
+    model = ResNet(BasicBlock_imagenet, [2, 2, 2, 2], **kwargs)
     return model
 
 
-def resnet34(**kwargs):
-    model = ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
+def resnet50_imagenet(**kwargs):
+    model = ResNet(Bottleneck_imagenet, [3, 4, 6, 3], **kwargs)
     return model
 
 
-def resnet50(**kwargs):
-    model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
-    return model
-
-
-def resnet101(**kwargs):
-    model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
-    return model
-
-
-def resnet152(**kwargs):
-    model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
-    return model
-
-
-def resnext50_32x4d(**kwargs):
-    kwargs['groups'] = 32
-    kwargs['width_per_group'] = 4
-    model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
-    return model
-
-
-def resnext101_32x8d(**kwargs):
-    kwargs['groups'] = 32
-    kwargs['width_per_group'] = 8
-    model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
-    return model
-
-
-def wide_resnet50_2(**kwargs):
-    kwargs['width_per_group'] = 64 * 2
-    model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
-    return model
-
-
-def wide_resnet101_2(**kwargs):
-    kwargs['width_per_group'] = 64 * 2
-    model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
-    return model

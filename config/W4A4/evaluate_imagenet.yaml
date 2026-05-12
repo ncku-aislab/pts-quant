@@ -2,32 +2,37 @@ version: 0.1.0
 
 models:
   - model_name: ResNet18
+    dataset: imagenet
     mode: evaluate
     save_name: ResNet18-i4sc
-    result_path: result_csv/W4A4/evaluate.csv
+    result_path: result_csv/imagenet/W4A4/evaluate.csv
     weight_path: checkpoints/imagenet/ResNet18/ResNet18-i4sc.pth
   
   - model_name: ResNet50
+    dataset: imagenet
     mode: evaluate
     save_name: ResNet50-i4sc
-    result_path: result_csv/W4A4/evaluate.csv
+    result_path: result_csv/imagenet/W4A4/evaluate.csv
     weight_path: checkpoints/imagenet/ResNet50/ResNet50-i4sc.pth
 
   - model_name: MobileNetV2
+    dataset: imagenet
     mode: evaluate
     save_name: MobileNetV2-i4sc
-    result_path: result_csv/W4A4/evaluate.csv
+    result_path: result_csv/imagenet/W4A4/evaluate.csv
     weight_path: checkpoints/imagenet/MobileNetV2/MobileNetV2-i4sc.pth
   
   - model_name: RegNetX-600MF
+    dataset: imagenet
     mode: evaluate
     save_name: RegNetX-600MF-i4sc
-    result_path: result_csv/W4A4/evaluate.csv
+    result_path: result_csv/imagenet/W4A4/evaluate.csv
     weight_path: checkpoints/imagenet/RegNetX-600MF/RegNetX-600MF-i4sc.pth
   
   - model_name: RegNetX-3.2GF
+    dataset: imagenet
     mode: evaluate
     save_name: RegNetX-3.2GF-i4sc
-    result_path: result_csv/W4A4/evaluate.csv
+    result_path: result_csv/imagenet/W4A4/evaluate.csv
     weight_path: checkpoints/imagenet/RegNetX-3.2GF/RegNetX-3.2GF-i4sc.pth
     

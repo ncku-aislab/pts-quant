@@ -1,0 +1,73 @@
+version: 0.1.0
+
+models:
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i4sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-sigmoid_sigmoid_s2500.pth
+
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i4sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-tanh_sigmoid_s2500.pth
+  
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i4sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-tanh_tanh_s2500.pth
+  
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i4sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-zero_sigmoid_s2500.pth
+  
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i4sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i4sc-random_sigmoid_s2500.pth
+
+
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i2sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-sigmoid_sigmoid_s2500.pth
+
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i2sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-tanh_sigmoid_s2500.pth
+  
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i2sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-tanh_tanh_s2500.pth
+  
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i2sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-zero_sigmoid_s2500.pth
+  
+  - model_name: RegNetX-600MF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-600MF-i2sc
+    result_path: result_csv/imagenet/RegNetX-600MF/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-600MF/initialization/RegNetX-600MF-i2sc-random_sigmoid_s2500.pth

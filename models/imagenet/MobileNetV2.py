@@ -21,9 +21,9 @@ def conv_1x1_bn(inp, oup):
     )
 
 
-class InvertedResidual(nn.Module):
+class InvertedResidual_imagenet(nn.Module):
     def __init__(self, inp, oup, stride, expand_ratio):
-        super(InvertedResidual, self).__init__()
+        super(InvertedResidual_imagenet, self).__init__()
         self.stride = stride
         assert stride in [1, 2]
 
@@ -65,7 +65,7 @@ class InvertedResidual(nn.Module):
 class MobileNetV2(nn.Module):
     def __init__(self, n_class=1000, input_size=224, width_mult=1., dropout=0.0):
         super(MobileNetV2, self).__init__()
-        block = InvertedResidual
+        block = InvertedResidual_imagenet
         input_channel = 32
         last_channel = 1280
         interverted_residual_setting = [
@@ -129,7 +129,7 @@ class MobileNetV2(nn.Module):
                 m.bias.data.zero_()
 
 
-def mobilenetv2(**kwargs):
+def mobilenetv2_imagenet(**kwargs):
     """
     Constructs a MobileNetV2 model.
     """

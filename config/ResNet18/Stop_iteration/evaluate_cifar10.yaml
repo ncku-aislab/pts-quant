@@ -1,0 +1,52 @@
+version: 0.1.0
+
+models:
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-i4sc
+    result_path: result_csv/cifar10/ResNet18/stop_iteration/evaluate.csv
+    weight_path: checkpoints/cifar10/ResNet18/stop_iteration/ResNet18-i4sc-s0.pth
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-i4sc
+    result_path: result_csv/cifar10/ResNet18/stop_iteration/evaluate.csv
+    weight_path: checkpoints/cifar10/ResNet18/stop_iteration/ResNet18-i4sc-s1000.pth
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-i4sc
+    result_path: result_csv/cifar10/ResNet18/stop_iteration/evaluate.csv
+    weight_path: checkpoints/cifar10/ResNet18/stop_iteration/ResNet18-i4sc-s2500.pth
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-i4sc
+    result_path: result_csv/cifar10/ResNet18/stop_iteration/evaluate.csv
+    weight_path: checkpoints/cifar10/ResNet18/stop_iteration/ResNet18-i4sc-s5000.pth
+
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-i2sc
+    result_path: result_csv/cifar10/ResNet18/stop_iteration/evaluate.csv
+    weight_path: checkpoints/cifar10/ResNet18/stop_iteration/ResNet18-i2sc-s0.pth
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-i2sc
+    result_path: result_csv/cifar10/ResNet18/stop_iteration/evaluate.csv
+    weight_path: checkpoints/cifar10/ResNet18/stop_iteration/ResNet18-i2sc-s1000.pth
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-i2sc
+    result_path: result_csv/cifar10/ResNet18/stop_iteration/evaluate.csv
+    weight_path: checkpoints/cifar10/ResNet18/stop_iteration/ResNet18-i2sc-s2500.pth
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-i2sc
+    result_path: result_csv/cifar10/ResNet18/stop_iteration/evaluate.csv
+    weight_path: checkpoints/cifar10/ResNet18/stop_iteration/ResNet18-i2sc-s5000.pth

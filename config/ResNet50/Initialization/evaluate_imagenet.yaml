@@ -1,0 +1,73 @@
+version: 0.1.0
+
+models:
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i4sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i4sc-sigmoid_sigmoid_s2500.pth
+
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i4sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i4sc-tanh_sigmoid_s2500.pth
+  
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i4sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i4sc-tanh_tanh_s2500.pth
+  
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i4sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i4sc-zero_sigmoid_s2500.pth
+  
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i4sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i4sc-random_sigmoid_s2500.pth
+
+
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i2sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i2sc-sigmoid_sigmoid_s2500.pth
+
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i2sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i2sc-tanh_sigmoid_s2500.pth
+  
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i2sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i2sc-tanh_tanh_s2500.pth
+  
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i2sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i2sc-zero_sigmoid_s2500.pth
+  
+  - model_name: ResNet50
+    dataset: imagenet
+    mode: evaluate
+    save_name: ResNet50-i2sc
+    result_path: result_csv/imagenet/ResNet50/initialization/evaluate.csv
+    weight_path: checkpoints/imagenet/ResNet50/initialization/ResNet50-i2sc-random_sigmoid_s2500.pth

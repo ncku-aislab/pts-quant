@@ -87,9 +87,14 @@ PTS-Quant
 │   └── block_recon.py
 │
 ├── models/
-│   ├── Resnet.py
-│   ├── regnet.py
-│   └── MobileNetV2.py
+│   ├── cifar10
+│   │   ├── Resnet.py
+│   │   ├── regnet.py
+│   │   └── MobileNetV2.py
+│   ├── imagenet
+│   │   ├── Resnet.py
+│   │   ├── regnet.py
+│   │   └── MobileNetV2.py
 │
 ├── configs/
 │
@@ -110,7 +115,7 @@ PTS-Quant
 
 ## Installation
 
-First clone the repository with `git clone`
+First clone the repository with `git clone ssh://git@gitlab.aislab.ee.ncku.edu.tw:3175/aislab-internal/research/active-research/model-compression/pts-quant.git`
 
 ### Create environment with docker
 
@@ -149,6 +154,10 @@ data/
         │ ├── n01443537/
         │ └── ...
 ```
+
+### cifar10
+
+Automatic download by torchvision
 
 > **Note:** Each class should be stored in a separate folder, which is required by standard PyTorch `ImageFolder` dataloaders.
 
@@ -198,13 +207,15 @@ version: 0.1.0
 models:
   - model_name: ResNet18
     mode: reconstruction
+    dataset: imagenet
+    mode: reconstruction
     save_name: ResNet18-i4sc
     wq_params: {'n_bits': 4, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
     aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
                     'leaf_param': True, 'prob': 0.5}
     constraint_fn: 'sigmoid'   #constraint function for the rounding value
     initialization_fn: 'tanh'  #initialization function for the rounding value
-    scale_iter: [2500]
+    scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
     result_path: result_csv/ResNet18/initialization/reconstruct.csv
     save_path: checkpoints/ResNet18/initialization/ResNet18-i4sc-tanh_sigmoid_s2500.pth
@@ -247,13 +258,21 @@ To evaluate a saved checkpoint:
   - weight quantization
   - activation quantization
 
+
 ### Model
-The following models are supported:
+The following models are supported in imagenet:
 - ResNet18
 - ResNet50
 - MobileNetV2
 - RegNetX-600MF
 - RegNetX-3.2GF
+
+The following models are supported in cifar10:
+- ResNet18
+- ResNet50
+- MobileNetV2
+- RegNetX-200MF
+- RegNetX-400MF
 
 You can define multiple models in the config:
 ```
@@ -261,6 +280,22 @@ models:
   - model_name: ResNet18
     ...
   - model_name: ResNet50
+    ...
+```
+
+### Dataset
+This code supports two datasets
+- imagenet
+- cifar10
+
+You can define datasets in the config:
+```
+models:
+  - model_name: ResNet18
+    dataset: imagenet
+    ...
+  - model_name: ResNet18
+    dataset: cifar10
     ...
 ```
 
@@ -308,6 +343,11 @@ Specifies the file path for saving experiment results.
 - If not provided, the default path is `result_csv/ImageNet.csv`.
 - The parent directory will be automatically created if it does not exist.
 
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> 06b2349 (Add cifar10 settings, experimental results, and update README.md(fix #11))
 ### Save Path
 Specifies where to save quantized checkpoints (reconstruction mode only).
 
@@ -316,6 +356,7 @@ Specifies where to save quantized checkpoints (reconstruction mode only).
 
 - If multiple `scale_iter` values are used, filenames are automatically adjusted to avoid overwriting.
 
+<<<<<<< HEAD
 ### Test Batch Size
 
 Specifies the batch size used during evaluation.
@@ -326,6 +367,14 @@ Specifies the batch size used during evaluation.
 Example:
 `test_batch_size: 32`
 
+=======
+### Weight path
+The weight path you want to load your quantized checkpoints (evaluate mode only).
+
+- Type: `str`
+
+>>>>>>> Stashed changes
+>>>>>>> 06b2349 (Add cifar10 settings, experimental results, and update README.md(fix #11))
 ### Example Usage
 After editing the configuration file, calibration can run:
 `python quant/ptq.py --config config/W2A4/W2A4.yaml`

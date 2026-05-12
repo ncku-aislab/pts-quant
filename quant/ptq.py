@@ -184,17 +184,24 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
     result_path = config.get("result_path", "result_csv/ImageNet.csv")
     weight_path = config.get("weight_path", None)
     test_batch_size = config.get("test_batch_size", 16)
+    dataset = config.get("dataset", "imagenet")
 
     if weight_path is None:
         raise ValueError("weight_path must be provided when mode='evaluate'.")
+    
+    if dataset == "cifar10" and weight_path is None:
+        raise ValueError("weight_path must be provided for CIFAR-10 reconstruction.")
 
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    _, testloader = build_imagenet_data(
-        data_path = "data/ImageNet-1k",
-        batch_size=test_batch_size,
-    )
+    # Dataset
+    if dataset == "imagenet":
+        _, testloader = build_imagenet_data(
+            data_path = "data/ImageNet-1k",
+            batch_size=test_batch_size)
+    elif dataset == "cifar10":
+        _, testloader = load_cifar10(batch_size=test_batch_size)
 
     checkpoint = torch.load(weight_path, map_location="cpu")
 
@@ -217,6 +224,7 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
         checkpoint=checkpoint,
         wq_params=wq_params,
         aq_params=aq_params,
+        dataset=dataset,
     )
 
     qnn.to(device)
@@ -265,8 +273,9 @@ def calibrate(config: ExperimentConfig, device=None):
     joint_training = config["joint_training"]
     result_path = config.get("result_path", "result_csv/ImageNet.csv")
     save_path = config.get("save_path", None)
+    weight_path = config.get("weight_path", None)
     mode = config.get("mode", "reconstruction")
-    
+    dataset = config.get("dataset", "imagenet")
     
     # Hyperparameters
     num_samples = 1024  #size of the calibration dataset
@@ -284,19 +293,31 @@ def calibrate(config: ExperimentConfig, device=None):
     Temp = 4.0          #temperature coefficient for KL divergence
     bn_lr = 1e-3        #learning rate for DC
     lamb_c = 0.02       #hyper-parameter for DC
-
-    if mode not in ["reconstruction", "calibrate"]:
-        raise ValueError(f"Unsupported mode for calibrate(): {mode}")
+    
+    if dataset == "cifar10" and weight_path is None:
+        raise ValueError("weight_path must be provided for CIFAR-10 reconstruction.")
 
     # Dataset
-    trainloader, testloader = build_imagenet_data(data_path="data/ImageNet-1k", batch_size=16)
-    trainloader, calibloader = split_data(trainloader, num_samples)
-    cali_data, _ = get_train_samples(calibloader, num_samples)
+    if dataset == "imagenet":
+        trainloader, testloader = build_imagenet_data(
+            data_path = "data/ImageNet-1k",
+            batch_size=16)
+        trainloader, calibloader = split_data(trainloader, num_samples)
+        cali_data, _ = get_train_samples(calibloader, num_samples)
+    elif dataset == "cifar10":
+        trainloader, testloader = load_cifar10()
+        trainloader, calibloader = split_data(trainloader, num_samples)
+        cali_data, _ = split_data_label(calibloader)
 
     #model
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = load_model("full", model_name)
+    model = load_model(
+        model_type="full",
+        checkpoint=weight_path,
+        model_name=model_name,
+        dataset=dataset,
+    )
     model.cuda()
     model.eval()
 

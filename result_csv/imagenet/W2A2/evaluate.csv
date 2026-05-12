@@ -1,0 +1,6 @@
+,Acc@1,Acc@5,model,mode,weight_path,init_fn,constraint_fn,s_iter,w_bits,a_bits,joint_training
+0,52.18,77.886,ResNet18-i2sc,evaluate,checkpoints/imagenet/ResNet18/ResNet18-i2sc.pth,tanh,sigmoid,2500,2,2,True
+0,56.636,82.022,ResNet50-i2sc,evaluate,checkpoints/imagenet/ResNet50/ResNet50-i2sc.pth,tanh,sigmoid,2500,2,2,True
+0,8.194,22.314,MobileNetV2-i2sc,evaluate,checkpoints/imagenet/MobileNetV2/MobileNetV2-i2sc.pth,tanh,sigmoid,2500,2,2,True
+0,38.864,66.654,RegNetX-600MF-i2sc,evaluate,checkpoints/imagenet/RegNetX-600MF/RegNetX-600MF-i2sc.pth,tanh,sigmoid,2500,2,2,True
+0,51.678,78.8,RegNetX-3.2GF-i2sc,evaluate,checkpoints/imagenet/RegNetX-3.2GF/RegNetX-3.2GF-i2sc.pth,tanh,sigmoid,2500,2,2,True

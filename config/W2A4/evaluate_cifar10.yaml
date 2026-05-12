@@ -1,0 +1,38 @@
+version: 0.1.0
+
+models:
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet18-W2A4-sc
+    result_path: result_csv/cifar10/W2A4/evaluate.csv
+    weight_path: checkpoints/cifar10/W2A4/ResNet18-W2A4sc.pth
+  
+  - model_name: ResNet50
+    dataset: cifar10
+    mode: evaluate
+    save_name: ResNet50-W2A4-sc
+    result_path: result_csv/cifar10/W2A4/evaluate.csv
+    weight_path: checkpoints/cifar10/W2A4/ResNet50-W2A4sc.pth
+
+  - model_name: MobileNetV2
+    dataset: cifar10
+    mode: evaluate
+    save_name: MobileNetV2-W2A4-sc
+    result_path: result_csv/cifar10/W2A4/evaluate.csv
+    weight_path: checkpoints/cifar10/W2A4/MobileNetV2-W2A4sc.pth
+  
+  - model_name: RegNetX-200MF
+    dataset: cifar10
+    mode: evaluate
+    save_name: RegNetX-200MF-W2A4-sc
+    result_path: result_csv/cifar10/W2A4/evaluate.csv
+    weight_path: checkpoints/cifar10/W2A4/RegNetX-200MF-W2A4sc.pth
+  
+  - model_name: RegNetX-400MF
+    dataset: cifar10
+    mode: evaluate
+    save_name: RegNetX-400MF-W2A4-sc
+    result_path: result_csv/cifar10/W2A4/evaluate.csv
+    weight_path: checkpoints/cifar10/W2A4/RegNetX-400MF-W2A4sc.pth
+    

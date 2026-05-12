@@ -1,0 +1,16 @@
+version: 0.1.0
+
+models:
+  - model_name: RegNetX-200MF
+    dataset: cifar10
+    mode: evaluate
+    save_name: RegNetX-200MF-i4sc
+    result_path: result_csv/cifar10/RegNetX-200MF/joint_training/evaluate.csv
+    weight_path: checkpoints/cifar10/RegNetX-200MF/joint_training/RegNetX-200MF-i4sc-joint_false_s2500.pth
+
+  - model_name: RegNetX-200MF
+    dataset: cifar10
+    mode: evaluate
+    save_name: RegNetX-200MF-i2sc
+    result_path: result_csv/cifar10/RegNetX-200MF/joint_training/evaluate.csv
+    weight_path: checkpoints/cifar10/RegNetX-200MF/joint_training/RegNetX-200MF-i2sc-joint_false_s2500.pth

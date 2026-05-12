@@ -1,0 +1,78 @@
+version: 0.1.0
+
+models:
+  - model_name: ResNet18
+    dataset: cifar10
+    mode: reconstruction
+    save_name: ResNet18-W2A4-sc
+    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
+                    'leaf_param': True, 'prob': 0.5}
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [2500]
+    joint_training: True
+    result_path: result_csv/cifar10/W2A4/reconstruct.csv
+    weight_path: checkpoints/cifar10/full/ResNet18.pth
+    save_path: checkpoints/cifar10/W2A4/ResNet18-W2A4sc.pth
+  
+  - model_name: ResNet50
+    dataset: cifar10
+    mode: reconstruction
+    save_name: ResNet50-W2A4-sc
+    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
+                    'leaf_param': True, 'prob': 0.5}
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [2500]
+    joint_training: True
+    result_path: result_csv/cifar10/W2A4/reconstruct.csv
+    weight_path: checkpoints/cifar10/full/ResNet50.pth
+    save_path: checkpoints/cifar10/W2A4/ResNet50-W2A4sc.pth
+
+  - model_name: MobileNetV2
+    dataset: cifar10
+    mode: reconstruction
+    save_name: MobileNetV2-W2A4-sc
+    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
+                    'leaf_param': True, 'prob': 0.5}
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [2500]
+    joint_training: True
+    result_path: result_csv/cifar10/W2A4/reconstruct.csv
+    weight_path: checkpoints/cifar10/full/MobileNetV2.pth
+    save_path: checkpoints/cifar10/W2A4/MobileNetV2-W2A4sc.pth
+  
+  - model_name: RegNetX-200MF
+    dataset: cifar10
+    mode: reconstruction
+    save_name: RegNetX-200MF-W2A4-sc
+    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
+                    'leaf_param': True, 'prob': 0.5}
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [2500]
+    joint_training: True
+    result_path: result_csv/cifar10/W2A4/reconstruct.csv
+    weight_path: checkpoints/cifar10/full/RegNetX-200MF.pth
+    save_path: checkpoints/cifar10/W2A4/RegNetX-200MF-W2A4sc.pth
+  
+  - model_name: RegNetX-400MF
+    dataset: cifar10
+    mode: reconstruction
+    save_name: RegNetX-400MF-W2A4-sc
+    wq_params: {'n_bits': 2, symmetric: False, 'channel_wise': True, 'scale_method': 'mse'}
+    aq_params: {'n_bits': 4, symmetric: False, 'channel_wise': False, 'scale_method': 'mse',
+                    'leaf_param': True, 'prob': 0.5}
+    constraint_fn: 'sigmoid'   #constraint function for the rounding value
+    initialization_fn: 'tanh'  #initialization function for the rounding value
+    scale_iter: [2500]
+    joint_training: True
+    result_path: result_csv/cifar10/W2A4/reconstruct.csv
+    weight_path: checkpoints/cifar10/full/RegNetX-400MF.pth
+    save_path: checkpoints/cifar10/W2A4/RegNetX-400MF-W2A4sc.pth
+    

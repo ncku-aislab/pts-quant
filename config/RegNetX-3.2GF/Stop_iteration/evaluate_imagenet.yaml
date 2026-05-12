@@ -1,0 +1,52 @@
+version: 0.1.0
+
+models:
+  - model_name: RegNetX-3.2GF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i4sc
+    result_path: result_csv/imagenet/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i4sc-s0.pth
+  - model_name: RegNetX-3.2GF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i4sc
+    result_path: result_csv/imagenet/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i4sc-s1000.pth
+  - model_name: RegNetX-3.2GF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i4sc
+    result_path: result_csv/imagenet/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i4sc-s2500.pth
+  - model_name: RegNetX-3.2GF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i4sc
+    result_path: result_csv/imagenet/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i4sc-s5000.pth
+
+  - model_name: RegNetX-3.2GF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i2sc
+    result_path: result_csv/imagenet/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i2sc-s0.pth
+  - model_name: RegNetX-3.2GF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i2sc
+    result_path: result_csv/imagenet/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i2sc-s1000.pth
+  - model_name: RegNetX-3.2GF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i2sc
+    result_path: result_csv/imagenet/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i2sc-s2500.pth
+  - model_name: RegNetX-3.2GF
+    dataset: imagenet
+    mode: evaluate
+    save_name: RegNetX-3.2GF-i2sc
+    result_path: result_csv/imagenet/RegNetX-3.2GF/stop_iteration/evaluate.csv
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/RegNetX-3.2GF-i2sc-s5000.pth
