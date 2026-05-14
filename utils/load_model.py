@@ -96,6 +96,23 @@ def _build_fp_model(model_name: str, pretrained: bool = True,  dataset: str = "i
 
     return model
 
+def _restore_quantizer_state(quantizer, state):
+    for attr in [
+        "scale",
+        "zero_point",
+        "alpha",
+        "pts_alpha",
+        "log2_scale_floor",
+    ]:
+        value = state.get(attr, None)
+
+        if value is None:
+            continue
+
+        if attr in ["alpha", "pts_alpha"] and isinstance(value, torch.Tensor):
+            setattr(quantizer, attr, torch.nn.Parameter(value))
+        else:
+            setattr(quantizer, attr, value)
 
 def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: dict = None):
     if quantizer_state is None:
@@ -115,6 +132,10 @@ def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: dict = None)
                 constraint_fn=wq_state.get("constraint_fn", "sigmoid"),
                 initialization_fn=wq_state.get("initialization_fn", "sigmoid"),
             )
+            _restore_quantizer_state(
+                module.weight_quantizer,
+                wq_state,
+            )
 
             aq_name = f"{name}.act_quantizer"
             aq_state = quantizer_state.get(aq_name, {})
@@ -128,6 +149,10 @@ def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: dict = None)
                     constraint_fn=aq_state.get("constraint_fn", "sigmoid"),
                     initialization_fn=aq_state.get("initialization_fn", "sigmoid"),
                 )
+                _restore_quantizer_state(
+                    module.act_quantizer,
+                    aq_state,
+                )
 
         elif isinstance(module, BaseQuantBlock):
             aq_name = f"{name}.act_quantizer"
@@ -139,6 +164,10 @@ def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: dict = None)
                     pts_mode="learned_hard_sigmoid",
                     constraint_fn=aq_state.get("constraint_fn", "sigmoid"),
                     initialization_fn=aq_state.get("initialization_fn", "sigmoid"),
+                )
+                _restore_quantizer_state(
+                    module.act_quantizer,
+                    aq_state,
                 )
 
 
