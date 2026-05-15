@@ -295,7 +295,7 @@ def calibrate(config: ExperimentConfig, device=None):
         raise ValueError(f"Unsupported mode for calibrate(): {mode}")
 
     # Dataset
-    trainloader, testloader = build_imagenet_data(data_path="data/ImageNet-1k/ILSVRC/Data/CLS-LOC", batch_size=16)
+    trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
     trainloader, calibloader = split_data(trainloader, num_samples)
     cali_data, _ = get_train_samples(calibloader, num_samples)
 

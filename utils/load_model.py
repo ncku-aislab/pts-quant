@@ -163,7 +163,7 @@ def _load_quantized_model(
 def load_model(
     model_type: str,
     model_name: str,
-    checkpoint: Optional[dict],
+    checkpoint: Optional[dict]=None,
     wq_params=None,
     aq_params=None,
     pretrained: bool = True,
