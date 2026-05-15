@@ -1,0 +1,3 @@
+,Acc@1,Acc@5,model,mode,init_fn,constraint_fn,s_iter,w_bits,a_bits,joint_training
+0,95.26,99.87,ResNet50-i4sc,reconstruction,tanh,sigmoid,2500,4,4,True
+0,92.71,99.82,ResNet50-i2sc,reconstruction,tanh,sigmoid,2500,2,2,True

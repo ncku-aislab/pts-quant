@@ -260,6 +260,14 @@ Specifies where to save quantized checkpoints (reconstruction mode only).
 
 - If multiple `scale_iter` values are used, filenames are automatically adjusted to avoid overwriting.
 
+### Test batch size
+Specifies the test batch size (evaluate mode only).
+
+Default is set to batch size = 16.
+
+- If you want to change the batch size:
+`test_batch_size: 32`
+
 ### Example Usage
 After editing the configuration file, run:
 `python quant/ptq.py --config config/ResNet18/Initialization/Initialization.yaml`

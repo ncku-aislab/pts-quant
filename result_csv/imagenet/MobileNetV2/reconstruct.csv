@@ -1,0 +1,3 @@
+,Acc@1,Acc@5,model,mode,init_fn,constraint_fn,s_iter,w_bits,a_bits,joint_training
+0,67.054,87.44,MobileNetV2-i4sc,reconstruction,tanh,sigmoid,2500,4,4,True
+0,8.194,22.314,MobileNetV2-i2sc,reconstruction,tanh,sigmoid,2500,2,2,True

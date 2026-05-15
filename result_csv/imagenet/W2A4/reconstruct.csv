@@ -1,0 +1,6 @@
+,Acc@1,Acc@5,model,mode,init_fn,constraint_fn,s_iter,w_bits,a_bits,joint_training
+0,63.902,86.142,ResNet18-W2A4-sc,reconstruction,tanh,sigmoid,2500,2,4,True
+0,69.446,89.562,ResNet50-W2A4-sc,reconstruction,tanh,sigmoid,2500,2,4,True
+0,43.562,70.084,MobileNetV2-W2A4-sc,reconstruction,tanh,sigmoid,2500,2,4,True
+0,62.0,84.89,RegNetX-600MF-W2A4-sc,reconstruction,tanh,sigmoid,2500,2,4,True
+0,71.254,90.734,RegNetX-3.2GF-W2A4-sc,reconstruction,tanh,sigmoid,2500,2,4,True

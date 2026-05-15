@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from typing import Optional
 
 from models.ResNet import resnet18 as _resnet18
 from models.ResNet import resnet50 as _resnet50
@@ -101,7 +102,7 @@ def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: dict = None)
 
 def _load_quantized_model(
     model_name: str,
-    checkpoint: str,
+    checkpoint: Optional[dict],
     wq_params: dict,
     aq_params: dict,
     **kwargs,
@@ -162,7 +163,7 @@ def _load_quantized_model(
 def load_model(
     model_type: str,
     model_name: str,
-    checkpoint: dict,
+    checkpoint: Optional[dict],
     wq_params=None,
     aq_params=None,
     pretrained: bool = True,
