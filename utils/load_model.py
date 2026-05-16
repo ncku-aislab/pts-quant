@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from typing import Optional
+from typing import Optional, Dict
 
 from models.ResNet import resnet18 as _resnet18
 from models.ResNet import resnet50 as _resnet50
@@ -54,7 +54,7 @@ def _build_fp_model(model_name: str, pretrained: bool = True, **kwargs):
     return model
 
 
-def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: dict = None):
+def _replace_quantizers_with_pts(model: nn.Module, quantizer_state: Optional[Dict[str, Dict]] = None):
     if quantizer_state is None:
         quantizer_state = {}
 

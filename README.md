@@ -182,6 +182,26 @@ models:
     save_path: checkpoints/ResNet18/initialization/ResNet18-i4sc-tanh_sigmoid_s2500.pth
 ```
 ### Evaluate Example
+
+The evaluate mode is used to verify the performance of a previously reconstructed quantized checkpoint without running PTQ reconstruction again.
+
+During evaluation:
+
+- The quantized checkpoint is loaded from weight_path
+- Quantizers and rounding values are restored automatically
+- The model is switched to quantized inference mode
+- Top-1 / Top-5 accuracy is evaluated on the validation dataset
+
+A saved checkpoint contains:
+
+- quantized model weights
+- quantizer states
+- scale rounding values
+- weight rounding values
+- experiment configuration
+
+This allows users to directly reproduce and verify quantized model performance from saved checkpoints.
+
 To evaluate a saved checkpoint:
 ```
   - model_name: ResNet18
@@ -190,6 +210,14 @@ To evaluate a saved checkpoint:
     result_path: result_csv/ResNet18/joint_training/evaluate.csv
     weight_path: checkpoints/ResNet18/joint_training/ResNet18-i4sc-joint_false_s2500.pth
 ```
+
+#### Note
+- weight_path is required in evaluate mode
+- Reconstruction/calibration will NOT be performed
+- The checkpoint must be generated from reconstruction mode
+- Evaluation automatically enables:
+  - weight quantization
+  - activation quantization
 
 ### Model
 The following models are supported:
