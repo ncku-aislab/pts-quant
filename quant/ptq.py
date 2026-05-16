@@ -148,8 +148,7 @@ def save_quantized_checkpoint(
 
     Path(final_save_path).parent.mkdir(parents=True, exist_ok=True)
 
-    checkpoint_config = dict(config)
-    checkpoint_config.update({
+    config.update({
         "w_bits": config["wq_params"]["n_bits"],
         "a_bits": config["aq_params"]["n_bits"],
         "s_iter": s_iter,
@@ -161,7 +160,7 @@ def save_quantized_checkpoint(
         "state_dict": model.state_dict(),
         "quantizer_state": collect_quantizer_state(model),
         "quantized_weights": collect_quantized_weights(model),
-        "config": checkpoint_config,
+        "config": config,
         "s_iter": s_iter,
     }
 
@@ -209,8 +208,8 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
     else:
         metadata = {}
 
-    wq_params = metadata.get("wq_params")
-    aq_params = metadata.get("aq_params")
+    wq_params = metadata.get("wq_params", {})
+    aq_params = metadata.get("aq_params", {})
 
     qnn = load_model(
         model_type="quantized",
@@ -224,12 +223,7 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
     qnn.eval()
 
     print(qnn)
-
-    if not isinstance(wq_params, dict):
-        wq_params = {}
-    if not isinstance(aq_params, dict):
-        aq_params = {}
-
+    
     res = validate_model(testloader, qnn, device)
     res.update({
         "model": _get_config_value(metadata, "save_name", save_name),
