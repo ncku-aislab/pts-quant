@@ -5,10 +5,10 @@ models:
     mode: evaluate
     save_name: RegNetX-600MF-i4sc
     result_path: result_csv/RegNetX-600MF/joint_training/evaluate.csv
-    weight_path: checkpoints/RegNetX-600MF/joint_training/RegNetX-600MF-i4sc-joint_false_s2500.pth
+    weight_path: checkpoints/imagenet/RegNetX-600MF/joint_training/RegNetX-600MF-i4sc-joint_false_s2500.pth
 
   - model_name: RegNetX-600MF
     mode: evaluate
     save_name: RegNetX-600MF-i2sc
     result_path: result_csv/RegNetX-600MF/joint_training/evaluate.csv
-    weight_path: checkpoints/RegNetX-600MF/joint_training/RegNetX-600MF-i2sc-joint_false_s2500.pth
+    weight_path: checkpoints/imagenet/RegNetX-600MF/joint_training/RegNetX-600MF-i2sc-joint_false_s2500.pth

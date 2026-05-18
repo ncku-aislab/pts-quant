@@ -12,7 +12,7 @@ models:
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
     result_path: result_csv/RegNetX-3.2GF/stop_iteration/reconstruct.csv
-    save_path: checkpoints/RegNetX-3.2GF/stop_iteration/
+    save_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/
 
   - model_name: RegNetX-3.2GF
     mode: reconstruction
@@ -25,4 +25,4 @@ models:
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
     result_path: result_csv/RegNetX-3.2GF/stop_iteration/reconstruct.csv
-    save_path: checkpoints/RegNetX-3.2GF/stop_iteration/
+    save_path: checkpoints/imagenet/RegNetX-3.2GF/stop_iteration/

@@ -12,7 +12,7 @@ models:
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
     result_path: result_csv/ResNet18/stop_iteration/reconstruct.csv
-    save_path: checkpoints/ResNet18/stop_iteration/
+    save_path: checkpoints/imagenet/ResNet18/stop_iteration/
 
   - model_name: ResNet18
     mode: reconstruction
@@ -25,4 +25,4 @@ models:
     scale_iter: [0, 1000, 2500, 5000]
     joint_training: True
     result_path: result_csv/ResNet18/stop_iteration/reconstruct.csv
-    save_path: checkpoints/ResNet18/stop_iteration/
+    save_path: checkpoints/imagenet/ResNet18/stop_iteration/

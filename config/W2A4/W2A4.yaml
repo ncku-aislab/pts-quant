@@ -12,7 +12,7 @@ models:
     scale_iter: [2500]
     joint_training: True
     result_path: result_csv/W2A4/reconstruct.csv
-    save_path: checkpoints/W2A4/ResNet18-W2A4sc.pth
+    save_path: checkpoints/imagenet/W2A4/ResNet18-W2A4sc.pth
   
   - model_name: ResNet50
     mode: reconstruction
@@ -25,7 +25,7 @@ models:
     scale_iter: [2500]
     joint_training: True
     result_path: result_csv/W2A4/reconstruct.csv
-    save_path: checkpoints/W2A4/ResNet50-W2A4sc.pth
+    save_path: checkpoints/imagenet/W2A4/ResNet50-W2A4sc.pth
 
   - model_name: MobileNetV2
     mode: reconstruction
@@ -38,7 +38,7 @@ models:
     scale_iter: [2500]
     joint_training: True
     result_path: result_csv/W2A4/reconstruct.csv
-    save_path: checkpoints/W2A4/MobileNetV2-W2A4sc.pth
+    save_path: checkpoints/imagenet/W2A4/MobileNetV2-W2A4sc.pth
   
   - model_name: RegNetX-600MF
     mode: reconstruction
@@ -51,7 +51,7 @@ models:
     scale_iter: [2500]
     joint_training: True
     result_path: result_csv/W2A4/reconstruct.csv
-    save_path: checkpoints/W2A4/RegNetX-600MF-W2A4sc.pth
+    save_path: checkpoints/imagenet/W2A4/RegNetX-600MF-W2A4sc.pth
   
   - model_name: RegNetX-3.2GF
     mode: reconstruction
@@ -64,5 +64,5 @@ models:
     scale_iter: [2500]
     joint_training: True
     result_path: result_csv/W2A4/reconstruct.csv
-    save_path: checkpoints/W2A4/RegNetX-3.2GF-W2A4sc.pth
+    save_path: checkpoints/imagenet/W2A4/RegNetX-3.2GF-W2A4sc.pth
     

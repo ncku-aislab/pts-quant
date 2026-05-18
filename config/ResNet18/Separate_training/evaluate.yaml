@@ -5,10 +5,10 @@ models:
     mode: evaluate
     save_name: ResNet18-i4sc
     result_path: result_csv/ResNet18/joint_training/evaluate.csv
-    weight_path: checkpoints/ResNet18/joint_training/ResNet18-i4sc-joint_false_s2500.pth
+    weight_path: checkpoints/imagenet/ResNet18/joint_training/ResNet18-i4sc-joint_false_s2500.pth
 
   - model_name: ResNet18
     mode: evaluate
     save_name: ResNet18-i2sc
     result_path: result_csv/ResNet18/joint_training/evaluate.csv
-    weight_path: checkpoints/ResNet18/joint_training/ResNet18-i2sc-joint_false_s2500.pth
+    weight_path: checkpoints/imagenet/ResNet18/joint_training/ResNet18-i2sc-joint_false_s2500.pth

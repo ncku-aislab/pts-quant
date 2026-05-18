@@ -5,10 +5,10 @@ models:
     mode: evaluate
     save_name: RegNetX-3.2GF-i4sc
     result_path: result_csv/RegNetX-3.2GF/joint_training/evaluate.csv
-    weight_path: checkpoints/RegNetX-3.2GF/joint_training/RegNetX-3.2GF-i4sc-joint_false_s2500.pth
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/joint_training/RegNetX-3.2GF-i4sc-joint_false_s2500.pth
 
   - model_name: RegNetX-3.2GF
     mode: evaluate
     save_name: RegNetX-3.2GF-i2sc
     result_path: result_csv/RegNetX-3.2GF/joint_training/evaluate.csv
-    weight_path: checkpoints/RegNetX-3.2GF/joint_training/RegNetX-3.2GF-i2sc-joint_false_s2500.pth
+    weight_path: checkpoints/imagenet/RegNetX-3.2GF/joint_training/RegNetX-3.2GF-i2sc-joint_false_s2500.pth

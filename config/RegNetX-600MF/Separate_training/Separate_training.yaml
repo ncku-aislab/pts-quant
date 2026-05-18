@@ -12,7 +12,7 @@ models:
     scale_iter: [2500]
     joint_training: False
     result_path: result_csv/RegNetX-600MF/joint_training/reconstruct.csv
-    save_path: checkpoints/RegNetX-600MF/joint_training/RegNetX-600MF-i4sc-joint_false_s2500.pth
+    save_path: checkpoints/imagenet/RegNetX-600MF/joint_training/RegNetX-600MF-i4sc-joint_false_s2500.pth
 
   - model_name: RegNetX-600MF
     mode: reconstruction
@@ -25,4 +25,4 @@ models:
     scale_iter: [2500]
     joint_training: False
     result_path: result_csv/RegNetX-600MF/joint_training/reconstruct.csv
-    save_path: checkpoints/RegNetX-600MF/joint_training/RegNetX-600MF-i2sc-joint_false_s2500.pth
+    save_path: checkpoints/imagenet/RegNetX-600MF/joint_training/RegNetX-600MF-i2sc-joint_false_s2500.pth
