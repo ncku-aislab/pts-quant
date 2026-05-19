@@ -139,8 +139,8 @@ After extraction, organize the dataset into the following structure:
 
 ```
 data/
-└── ILSVRC2012/
-        ├── ILSVRC2012_img_train/
+└── ImageNet-1k/
+        ├── train/
         │ ├── n01440764/
         │ ├── n01443537/
         │ └── ...
@@ -152,6 +152,34 @@ data/
 
 > **Note:** Each class should be stored in a separate folder, which is required by standard PyTorch `ImageFolder` dataloaders.
 
+### Dataset Setup
+
+The ImageNet dataset path is configured using symbolic links.
+
+Create symbolic links to your local ImageNet training and validation datasets:
+
+`bash scripts/setup_imagenet.sh /path/to/train /path/to/val`
+
+Example:
+```
+bash scripts/setup_imagenet.sh \
+    /storage/share/datasets/ImageNet-1k/ILSVRC/Data/CLS-LOC/train \
+    /storage/share/datasets/ImageNet-1k/ILSVRC/Data/CLS-LOC/val
+```
+
+This creates:
+```
+data/ImageNet-1k/
+├── train -> /path/to/train
+└── val   -> /path/to/val
+```
+
+The expected dataset structure used by the project is:
+```
+data/ImageNet-1k/
+├── train
+└── val
+```
 ---
 
 ## Running Experiments

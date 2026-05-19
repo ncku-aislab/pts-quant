@@ -192,7 +192,7 @@ def evaluate_checkpoint(config: ExperimentConfig, device=None):
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
     _, testloader = build_imagenet_data(
-        data_path = "data/ILSVRC2012",
+        data_path = "data/ImageNet-1k",
         batch_size=test_batch_size,
     )
 
@@ -289,7 +289,7 @@ def calibrate(config: ExperimentConfig, device=None):
         raise ValueError(f"Unsupported mode for calibrate(): {mode}")
 
     # Dataset
-    trainloader, testloader = build_imagenet_data(data_path="data/ILSVRC2012", batch_size=16)
+    trainloader, testloader = build_imagenet_data(data_path="data/ImageNet-1k", batch_size=16)
     trainloader, calibloader = split_data(trainloader, num_samples)
     cali_data, _ = get_train_samples(calibloader, num_samples)
 
