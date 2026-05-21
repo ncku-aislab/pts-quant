@@ -1,55 +1,39 @@
 #!/bin/bash
 
 # Usage:
-# bash scripts/setup_imagenet.sh /path/to/train /path/to/val
+# ./scripts/setup_imagenet.sh /path/to/train /path/to/val
 
-TRAIN_ROOT=$(realpath "$1")
-VAL_ROOT=$(realpath "$2")
-
+TRAIN_ROOT="$1"
+VAL_ROOT="$2"
 TARGET_ROOT="data/ImageNet-1k"
 
-if [ -z "$1" ] || [ -z "$2" ]; then
-    echo "Usage: bash scripts/setup_imagenet.sh /path/to/train /path/to/val"
+if [[ -z "$1" || -z "$2" ]]; then
+    echo "Usage: $0 /path/to/train /path/to/val"
     exit 1
 fi
 
-if [ ! -d "$TRAIN_ROOT" ]; then
-    echo "Error: training dataset path does not exist:"
-    echo "$TRAIN_ROOT"
-    exit 1
-fi
+function create_symlink() {
+    # Convert both to absolute paths to ensure the symlink is robust
+    local target=$(realpath -m "$1")
+    local symlink=$(realpath -sm "$2")
 
-if [ ! -d "$VAL_ROOT" ]; then
-    echo "Error: validation dataset path does not exist:"
-    echo "$VAL_ROOT"
-    exit 1
-fi
-
-mkdir -p "$TARGET_ROOT"
-
-# Handle existing train path
-if [ -e "$TARGET_ROOT/train" ]; then
-    if [ -L "$TARGET_ROOT/train" ]; then
-        rm "$TARGET_ROOT/train"
-    else
-        echo "Error: $TARGET_ROOT/train already exists and is not a symbolic link."
+    # Check if $target exists
+    if [[ ! -d "$target" ]]; then
+        echo "Error: $target doesn't exists."
         exit 1
     fi
-fi
 
-# Handle existing val path
-if [ -e "$TARGET_ROOT/val" ]; then
-    if [ -L "$TARGET_ROOT/val" ]; then
-        rm "$TARGET_ROOT/val"
-    else
-        echo "Error: $TARGET_ROOT/val already exists and is not a symbolic link."
-        exit 1
+    # Check if $symlink exists and is a "real directory" (not a symbolic link)
+    if [[ -d "$symlink" && ! -L "$symlink" ]]; then
+        echo "$symlink is an existing directory. Skipping."
+        return 0
     fi
-fi
 
-ln -s "$TRAIN_ROOT" "$TARGET_ROOT/train"
-ln -s "$VAL_ROOT" "$TARGET_ROOT/val"
+    mkdir -p "$(dirname "$symlink")"
 
-echo "Symbolic links created:"
-echo "$TARGET_ROOT/train -> $TRAIN_ROOT"
-echo "$TARGET_ROOT/val   -> $VAL_ROOT"
+    ln -snf "$target" "$symlink"
+    echo "link created/updated: $symlink -> $target"
+}
+
+create_symlink "$TRAIN_ROOT" "$TARGET_ROOT/train"
+create_symlink "$VAL_ROOT" "$TARGET_ROOT/val"
